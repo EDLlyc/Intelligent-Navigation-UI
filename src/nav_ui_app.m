@@ -32,13 +32,24 @@ function app = nav_ui_app(projectRoot)
         'CloseRequestFcn',@(~,~)delete(fig));
 
 % =====================================================================
-%  4.  MAP AXES  (left 69 %)
+%  4.  MAP AXES  (left 69 %)  +  RIGHT-CLICK CONTEXT MENU (P9)
 % =====================================================================
     mp = uipanel('Parent',fig,'Units','normalized', ...
         'Position',[0.005 0.06 0.685 0.935],'BackgroundColor',BD,'BorderType','none');
     mapAx = axes('Parent',mp,'Units','normalized', ...
         'Position',[0.01 0.01 0.98 0.98],'Color',[0 0 0]);
     hImg = imshow(mapImage,'Parent',mapAx);
+
+    % ---- Right-click context menu (P9) ----
+    cmenu = uicontextmenu('Parent',fig);
+    uimenu(cmenu,'Label','Add IV here',        'Callback',@(~,~)onAddIV(fig));
+    uimenu(cmenu,'Label','Auto-Add IV here',   'Callback',@(~,~)onAutoAddIV(fig));
+    uimenu(cmenu,'Label','Measure Distance',   'Callback',@(~,~)onDistBtn(fig));
+    uimenu(cmenu,'Label','Measure Trajectory',  'Callback',@(~,~)onTrajBtn(fig));
+    uimenu(cmenu,'Label','Generate Street View','Callback',@(~,~)onStreetViewBtn(fig));
+    uimenu(cmenu,'Label','Find Path',           'Callback',@(~,~)onPathBtn(fig));
+    set(mapAx,'UIContextMenu',cmenu);
+    set(hImg,'UIContextMenu',cmenu);
 
 % =====================================================================
 %  5.  RIGHT PANEL  (right 30 %)
@@ -51,6 +62,12 @@ function app = nav_ui_app(projectRoot)
         'Position',[0.03 0.97 0.94 0.025],'String','Mode: Idle', ...
         'FontName',FN,'FontSize',11,'FontWeight','bold', ...
         'BackgroundColor',BP,'ForegroundColor',FO,'HorizontalAlignment','center');
+
+    % ---- Coordinate display (P6: more prominent position) ----
+    coordDisp = uicontrol('Parent',rp,'Style','text','Units','normalized', ...
+        'Position',[0.03 0.945 0.94 0.023],'String','Coords: --', ...
+        'FontName',FN,'FontSize',10,'FontWeight','bold', ...
+        'BackgroundColor',[.16 .18 .24],'ForegroundColor',[.3 1 .5],'HorizontalAlignment','center');
 
     % ========== VEHICLE CONTROLS ==========
     sep(rp,0.96,BB); stit(rp,0.94,'VEHICLE CONTROLS',FN,BP,FS);
@@ -114,7 +131,7 @@ function app = nav_ui_app(projectRoot)
         'Position',[0.03 0.76 0.94 0.05],'String','Points: 0', ...
         'FontName',FN,'FontSize',9,'BackgroundColor',BP,'ForegroundColor',FL, ...
         'HorizontalAlignment','left');
-    skelAx = axes('Parent',t1,'Units','normalized','Position',[0.05 0.03 0.90 0.72], ...
+    skelAx = axes('Parent',t1,'Units','normalized','Position',[0.10 0.08 0.82 0.66], ...
         'Color',[.1 .1 .14],'XTick',[],'YTick',[]); axis(skelAx,'off');
 
     % ---- OR-2  Local View ----
@@ -162,9 +179,9 @@ function app = nav_ui_app(projectRoot)
 %  6.  STATUS BAR
 % =====================================================================
     stBar = uicontrol('Parent',fig,'Style','text','Units','normalized', ...
-        'Position',[0.005 0.005 0.99 0.045], ...
+        'Position',[0.005 0.005 0.99 0.048], ...
         'BackgroundColor',[.14 .16 .21],'ForegroundColor',FO, ...
-        'FontName',FN,'FontSize',10,'HorizontalAlignment','left', ...
+        'FontName',FN,'FontSize',12,'FontWeight','bold','HorizontalAlignment','left', ...
         'String','  Ready.  Click on the map to display real-world coordinates.');
 
 % =====================================================================
@@ -187,6 +204,7 @@ function app = nav_ui_app(projectRoot)
     % handles
     s.Figure = fig;   s.MapAxes = mapAx;  s.hImg = hImg;
     s.StatusBar = stBar;  s.ModeLabel = modeL;
+    s.CoordDisp = coordDisp;
     s.AngleInput = angIn; s.ScaleInput = scIn;
     s.IVListbox = ivLB;   s.DistResult = dR;  s.TrajResult = tR;
     s.RotAngleInput = rotIn;
@@ -195,6 +213,7 @@ function app = nav_ui_app(projectRoot)
     s.OR3Info = or3Info;
     s.SVAxes = svAx;
     s.PathInfo = pathInfo;
+    s.ContextMenu = cmenu;
     s.ClickCB = @(~,~) onMapClick(fig);
     setappdata(fig,'AppState',s);
     set(hImg,'ButtonDownFcn',s.ClickCB);
@@ -224,6 +243,7 @@ function onMapClick(fig)
     case 'idle'
         setSt(fig,sprintf('  Position: X=%.1f m, Y=%.1f m  |  Pixel(%d,%d)', ...
             wx,wy,round(oC),round(oR)),[.55 .85 .60]);
+        set(s.CoordDisp,'String',sprintf('X=%.1f m   Y=%.1f m',wx,wy));
 
     case 'add_iv'
         if is_on_road(round(oR),round(oC),s.RoadMask)
@@ -236,7 +256,7 @@ function onMapClick(fig)
             setappdata(fig,'AppState',s); refreshDisp(fig); updateIVLB(fig);
             setSt(fig,sprintf('  IV #%d at (%.1f,%.1f) angle=%.1f',niv.ID,wx,wy,a),[.4 .9 .5]);
         else
-            setSt(fig,'  Not on road! Click a road area.',[1 .4 .4]);
+            flashError(fig,'  Not on road! Click a road area.');
         end; return;
 
     case 'add_iv_auto'
@@ -251,10 +271,12 @@ function onMapClick(fig)
             setappdata(fig,'AppState',s); refreshDisp(fig); updateIVLB(fig);
             setSt(fig,sprintf('  IV #%d auto-aligned at %.1f deg',niv.ID,a),[.4 .9 .5]);
         else
-            setSt(fig,'  Not on road!',[1 .4 .4]);
+            flashError(fig,'  Not on road!');
         end; return;
 
     case 'measure_dist'
+        % P8: snap to nearest IV if within 15m
+        [wx,wy,cC,cR] = snapToIV(s,wx,wy,cC,cR,15);
         s.TempPoints=[s.TempPoints; wx wy cC cR];
         n=size(s.TempPoints,1);
         hold(s.MapAxes,'on');
@@ -317,7 +339,7 @@ function onMapClick(fig)
             set(s.SkelInfo,'String',sprintf('Points: %d',n));
             setSt(fig,sprintf('  Skeleton pt %d: (%.1f,%.1f)',n,wx,wy),[.4 .9 .5]);
         else
-            setSt(fig,'  Not on road!',[1 .4 .4]);
+            flashError(fig,'  Not on road!');
         end
 
     case 'street_view'
@@ -326,12 +348,12 @@ function onMapClick(fig)
             ang=find_road_direction(round(oR),round(oC),s.RoadMask);
             svImg=generate_street_view(s.MapImage,round(oR),round(oC),ang,s.MapHeight,s.Scale);
             cla(s.SVAxes); imshow(svImg,'Parent',s.SVAxes);
-            title(s.SVAxes,sprintf('Street View  angle=%.0f',ang),'Color',FL,'FontSize',9);
+            title(s.SVAxes,sprintf('Street View  angle=%.0f',ang),'Color',[.85 .88 .95],'FontSize',9);
             s.InteractiveMode='idle';
             set(s.ModeLabel,'String','Mode: Idle','ForegroundColor',[.55 .85 .60]);
             setSt(fig,'  Street view generated.',[.4 .9 .5]);
         else
-            setSt(fig,'  Not on road!',[1 .4 .4]);
+            flashError(fig,'  Not on road!');
         end
 
     case 'path_plan'
@@ -349,8 +371,8 @@ function onMapClick(fig)
             [rr2,rc2]=find_nearest_road(round(s.TempPoints(2,5)),round(s.TempPoints(2,6)),s.RoadMask);
             [pR,pC]=road_path_bfs(s.RoadMask,rr1,rc1,rr2,rc2);
             if isempty(pR)
-                setSt(fig,'  No path found!',[1 .4 .4]);
-                set(s.PathInfo,'String','No path found.');
+                flashError(fig,'  No path found! The two points may not be connected by road.');
+                set(s.PathInfo,'String','No path found (unreachable).');
             else
                 s.PathPixels=[pR pC];
                 pLen=0;
@@ -391,11 +413,33 @@ end
 function onReportIV(fig)
     s=getappdata(fig,'AppState');
     if isempty(s.IVList),msgbox('No IVs loaded.','Report','warn');return;end
+    % P7: Custom styled report popup with table layout
+    rFig = figure('Name','IV Position Report','NumberTitle','off', ...
+        'Color',[.18 .20 .25],'MenuBar','none','ToolBar','none', ...
+        'Position',[400 300 420 min(200+length(s.IVList)*28,500)],'Resize','off');
+    % Title
+    uicontrol('Parent',rFig,'Style','text','Units','normalized', ...
+        'Position',[0.05 0.88 0.90 0.10],'String', ...
+        sprintf('IV Position Report  (%d vehicles)',length(s.IVList)), ...
+        'FontName','Segoe UI','FontSize',13,'FontWeight','bold', ...
+        'BackgroundColor',[.18 .20 .25],'ForegroundColor',[.3 1 .5], ...
+        'HorizontalAlignment','center');
+    % Header
+    uicontrol('Parent',rFig,'Style','text','Units','normalized', ...
+        'Position',[0.05 0.82 0.90 0.06], ...
+        'String','  ID         X (m)        Y (m)      Angle (deg)', ...
+        'FontName','Consolas','FontSize',10,'FontWeight','bold', ...
+        'BackgroundColor',[.25 .28 .35],'ForegroundColor',[.85 .88 .95], ...
+        'HorizontalAlignment','left');
+    % Body
     lines=cell(1,length(s.IVList));
     for k=1:length(s.IVList),iv=s.IVList(k);
-        lines{k}=sprintf('IV #%d: X=%.1f m, Y=%.1f m, Angle=%.1f',iv.ID,iv.WorldX,iv.WorldY,iv.Angle);
+        lines{k}=sprintf('  #%-4d    %8.1f     %8.1f     %8.1f',iv.ID,iv.WorldX,iv.WorldY,iv.Angle);
     end
-    msgbox(lines,'IV Position Report','help');
+    uicontrol('Parent',rFig,'Style','listbox','Units','normalized', ...
+        'Position',[0.05 0.08 0.90 0.73],'String',lines, ...
+        'FontName','Consolas','FontSize',10, ...
+        'BackgroundColor',[.22 .24 .30],'ForegroundColor',[.9 .92 .98]);
     setSt(fig,sprintf('  Reported %d IVs.',length(s.IVList)),[.4 .9 .5]);
 end
 function onDistBtn(fig)
@@ -456,6 +500,7 @@ function onSkelShow(fig)
     xlabel(s.SkelAxes,'X (m)','Color',[.7 .7 .8]);
     ylabel(s.SkelAxes,'Y (m)','Color',[.7 .7 .8]);
     title(s.SkelAxes,'Road Skeleton (world)','Color',[.85 .88 .95],'FontSize',9);
+    axis(s.SkelAxes,'on');
     axis(s.SkelAxes,'equal');
     setSt(fig,'  Skeleton displayed in world coordinates.',[.4 .9 .5]);
 end
@@ -542,11 +587,17 @@ function refreshDisp(fig)
     cla(s.MapAxes);
     hI=imshow(s.RotatedImage,'Parent',s.MapAxes);
     set(hI,'ButtonDownFcn',s.ClickCB);
+    % Re-apply context menu to new image (P9)
+    if isfield(s,'ContextMenu') && isvalid(s.ContextMenu)
+        set(hI,'UIContextMenu',s.ContextMenu);
+    end
     hold(s.MapAxes,'on');
     oc=s.OrigCenter; rc=s.RotCenter;
-    % IVs
+    % IVs — pass click callback for IV click-to-select (P3)
     for k=1:length(s.IVList)
-        draw_iv(s.MapAxes,s.IVList(k),s.MapHeight,s.Scale,s.RotationAngle,oc,rc);
+        ivIdx = k;
+        cb = @(~,~) onIVClick(fig, ivIdx);
+        draw_iv(s.MapAxes,s.IVList(k),s.MapHeight,s.Scale,s.RotationAngle,oc,rc,cb);
     end
     % Skeleton overlay
     if size(s.SkelPixPts,1)>=2
@@ -614,6 +665,47 @@ function [rR,rC] = o2r(oR,oC,s)
 end
 function setSt(fig,msg,clr)
     s=getappdata(fig,'AppState');set(s.StatusBar,'String',msg,'ForegroundColor',clr);
+end
+function flashError(fig,msg)
+%FLASHERROR  Show error message with flashing red background (P4).
+    s=getappdata(fig,'AppState');
+    set(s.StatusBar,'String',msg,'ForegroundColor',[1 1 1], ...
+        'BackgroundColor',[.75 .15 .15]);
+    drawnow;
+    pause(0.35);
+    set(s.StatusBar,'ForegroundColor',[1 .4 .4], ...
+        'BackgroundColor',[.14 .16 .21]);
+end
+function [wx,wy,cC,cR] = snapToIV(s,wx,wy,cC,cR,thresh)
+%SNAPTOIV  If click is within thresh metres of an IV centre, snap to it (P8).
+    if isempty(s.IVList), return; end
+    bestD = thresh;
+    bestK = 0;
+    for k=1:length(s.IVList)
+        iv=s.IVList(k);
+        d=sqrt((wx-iv.WorldX)^2+(wy-iv.WorldY)^2);
+        if d<bestD, bestD=d; bestK=k; end
+    end
+    if bestK>0
+        iv=s.IVList(bestK);
+        wx=iv.WorldX; wy=iv.WorldY;
+        [pR,pC]=world_to_pixel(wx,wy,s.MapHeight,s.Scale);
+        if abs(s.RotationAngle)>0.001
+            [cR,cC]=o2r(pR,pC,s);
+        else
+            cC=pC; cR=pR;
+        end
+    end
+end
+function onIVClick(fig, ivIdx)
+%ONIVCLICK  Handle click on an IV in the map — select it in listbox (P3).
+    s=getappdata(fig,'AppState');
+    if ivIdx>=1 && ivIdx<=length(s.IVList)
+        set(s.IVListbox,'Value',ivIdx);
+        iv=s.IVList(ivIdx);
+        setSt(fig,sprintf('  Selected IV #%d  (%.1f, %.1f)  angle=%.1f',iv.ID,iv.WorldX,iv.WorldY,iv.Angle),[.3 .7 1]);
+        updateLocalView(fig);
+    end
 end
 function lab(p,pos,txt,fn,bg,fg)
     uicontrol('Parent',p,'Style','text','Units','normalized','Position',pos, ...

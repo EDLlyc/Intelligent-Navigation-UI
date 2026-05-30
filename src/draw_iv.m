@@ -1,6 +1,7 @@
-function h = draw_iv(ax, iv, mapHeight, scale, rotAngle, origCenter, rotCenter)
+function h = draw_iv(ax, iv, mapHeight, scale, rotAngle, origCenter, rotCenter, clickCB)
 %DRAW_IV Draw an IV rectangle (with heading indicator) on map axes.
 %   h = draw_iv(ax, iv, mapHeight, scale, rotAngle, origCenter, rotCenter)
+%   h = draw_iv(ax, iv, mapHeight, scale, rotAngle, origCenter, rotCenter, clickCB)
 %
 %   Inputs:
 %     ax         - axes handle to draw on
@@ -10,9 +11,10 @@ function h = draw_iv(ax, iv, mapHeight, scale, rotAngle, origCenter, rotCenter)
 %     rotAngle   - current map rotation in degrees
 %     origCenter - [cx, cy] of original image centre
 %     rotCenter  - [cx, cy] of rotated image centre
+%     clickCB    - (optional) callback for ButtonDownFcn on the IV body
 %
 %   Output:
-%     h - column vector of graphics handles (patch, line, text)
+%     h - column vector of graphics handles (patch, line, text, arrowhead)
 
     % ----- Colour palette (cycles by IV id) -----
     palette = [ ...
@@ -50,6 +52,25 @@ function h = draw_iv(ax, iv, mapHeight, scale, rotAngle, origCenter, rotCenter)
     headWx = iv.WorldX + halfL * 0.8 * cosA;
     headWy = iv.WorldY + halfL * 0.8 * sinA;
 
+    % ----- Arrowhead triangle vertices in world coords -----
+    % Arrow tip = heading point; base is perpendicular to heading
+    % at ~65% of halfL from centre, with half-width = halfW * 0.25
+    arrowBaseD = halfL * 0.65;          % distance from centre to arrow base
+    arrowHalfW = halfW * 0.25;         % half-width of arrow base
+
+    % Heading direction unit vector components are (cosA, sinA)
+    % Perpendicular direction is (-sinA, cosA)
+    arrowW = zeros(3, 2);  % 3 vertices: tip, base-left, base-right
+    % Vertex 1: tip (same as heading point)
+    arrowW(1,1) = headWx;
+    arrowW(1,2) = headWy;
+    % Vertex 2: base-left
+    arrowW(2,1) = iv.WorldX + arrowBaseD * cosA - arrowHalfW * (-sinA);
+    arrowW(2,2) = iv.WorldY + arrowBaseD * sinA - arrowHalfW * ( cosA);
+    % Vertex 3: base-right
+    arrowW(3,1) = iv.WorldX + arrowBaseD * cosA + arrowHalfW * (-sinA);
+    arrowW(3,2) = iv.WorldY + arrowBaseD * sinA + arrowHalfW * ( cosA);
+
     % ----- Convert to pixel coordinates -----
     pixC = zeros(4,1);   % column (x in axes)
     pixR = zeros(4,1);   % row    (y in axes)
@@ -58,6 +79,13 @@ function h = draw_iv(ax, iv, mapHeight, scale, rotAngle, origCenter, rotCenter)
     end
     [headR, headC_] = world_to_pixel(headWx, headWy, mapHeight, scale);
     [centR, centC]   = world_to_pixel(iv.WorldX, iv.WorldY, mapHeight, scale);
+
+    % Convert arrowhead vertices to pixel coords
+    arrPixC = zeros(3,1);
+    arrPixR = zeros(3,1);
+    for k = 1:3
+        [arrPixR(k), arrPixC(k)] = world_to_pixel(arrowW(k,1), arrowW(k,2), mapHeight, scale);
+    end
 
     % ----- Apply map rotation (original -> rotated pixel space) -----
     if abs(rotAngle) > 0.001
@@ -78,12 +106,24 @@ function h = draw_iv(ax, iv, mapHeight, scale, rotAngle, origCenter, rotCenter)
         dc = centC - origCenter(1);  dr = centR - origCenter(2);
         centC =  cosM * dc + sinM * dr + rotCenter(1);
         centR = -sinM * dc + cosM * dr + rotCenter(2);
+        % arrowhead vertices
+        for k = 1:3
+            dc = arrPixC(k) - origCenter(1);
+            dr = arrPixR(k) - origCenter(2);
+            arrPixC(k) =  cosM * dc + sinM * dr + rotCenter(1);
+            arrPixR(k) = -sinM * dc + cosM * dr + rotCenter(2);
+        end
     end
 
     % ----- Draw -----
     h1 = patch(ax, pixC, pixR, faceClr, ...
         'FaceAlpha', 0.55, 'EdgeColor', faceClr * 0.55, 'LineWidth', 2);
-    set(h1, 'HitTest', 'off');
+    set(h1, 'HitTest', 'on');
+
+    % Set click callback on IV body if provided
+    if nargin >= 8 && ~isempty(clickCB)
+        set(h1, 'ButtonDownFcn', clickCB);
+    end
 
     h2 = plot(ax, [centC, headC_], [centR, headR], '-', ...
         'Color', [1 1 0.3], 'LineWidth', 2);
@@ -95,5 +135,10 @@ function h = draw_iv(ax, iv, mapHeight, scale, rotAngle, origCenter, rotCenter)
         'BackgroundColor', [0.1 0.1 0.15]);
     set(h3, 'HitTest', 'off');
 
-    h = [h1; h2; h3];
+    % Arrowhead triangle (filled, bright yellow-orange)
+    h4 = patch(ax, arrPixC, arrPixR, [1 0.9 0.1], ...
+        'FaceAlpha', 1.0, 'EdgeColor', [0.8 0.7 0.0], 'LineWidth', 1);
+    set(h4, 'HitTest', 'off');
+
+    h = [h1; h2; h3; h4];
 end
