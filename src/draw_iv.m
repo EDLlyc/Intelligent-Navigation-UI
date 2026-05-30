@@ -49,14 +49,14 @@ function h = draw_iv(ax, iv, mapHeight, scale, rotAngle, origCenter, rotCenter, 
     end
 
     % Heading-tip point (for direction indicator)
-    headWx = iv.WorldX + halfL * 0.8 * cosA;
-    headWy = iv.WorldY + halfL * 0.8 * sinA;
+    headWx = iv.WorldX + halfL * 1.0 * cosA;
+    headWy = iv.WorldY + halfL * 1.0 * sinA;
 
     % ----- Arrowhead triangle vertices in world coords -----
     % Arrow tip = heading point; base is perpendicular to heading
-    % at ~65% of halfL from centre, with half-width = halfW * 0.25
-    arrowBaseD = halfL * 0.65;          % distance from centre to arrow base
-    arrowHalfW = halfW * 0.25;         % half-width of arrow base
+    % at ~30% of halfL from centre, with half-width = halfW * 0.8
+    arrowBaseD = halfL * 0.30;          % distance from centre to arrow base
+    arrowHalfW = halfW * 0.80;         % half-width of arrow base
 
     % Heading direction unit vector components are (cosA, sinA)
     % Perpendicular direction is (-sinA, cosA)
@@ -136,8 +136,8 @@ function h = draw_iv(ax, iv, mapHeight, scale, rotAngle, origCenter, rotCenter, 
     set(h3, 'HitTest', 'off');
 
     % Arrowhead triangle (filled, bright yellow-orange)
-    h4 = patch(ax, arrPixC, arrPixR, [1 0.9 0.1], ...
-        'FaceAlpha', 1.0, 'EdgeColor', [0.8 0.7 0.0], 'LineWidth', 1);
+    h4 = patch(ax, arrPixC, arrPixR, [1 1 0], ...
+        'FaceAlpha', 1.0, 'EdgeColor', [1 0.6 0], 'LineWidth', 1.5);
     set(h4, 'HitTest', 'off');
 
     h = [h1; h2; h3; h4];

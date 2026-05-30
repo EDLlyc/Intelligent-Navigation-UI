@@ -45,8 +45,9 @@ function streetImg = generate_street_view(mapImage, centreR, centreC, ...
         outRow = groundStart + gRow - 1;
         t = 1 - (gRow - 1) / max(groundH - 1, 1);   % 1 at horizon, 0 at bottom
 
-        dist  = 2 + viewLength * t^2;
-        halfW = viewWidth * (0.10 + 0.90 * (1 - t));
+        dist  = 2 + viewLength * (t^3);
+        % In true perspective, the visible width scales linearly with distance
+        halfW = 3 + viewWidth * (dist / (2 + viewLength));
 
         frac    = (colIdx - 0.5) / outW - 0.5;
         lateral = frac * halfW * 2;
