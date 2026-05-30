@@ -48,15 +48,14 @@ function h = draw_iv(ax, iv, mapHeight, scale, rotAngle, origCenter, rotCenter, 
         worldC(k,2) = iv.WorldY + sinA * local(k,1) + cosA * local(k,2);
     end
 
-    % Heading-tip point (for direction indicator)
-    headWx = iv.WorldX + halfL * 1.0 * cosA;
-    headWy = iv.WorldY + halfL * 1.0 * sinA;
+    % Heading-tip point (for direction indicator) - Protruding far in front!
+    headWx = iv.WorldX + halfL * 2.0 * cosA;
+    headWy = iv.WorldY + halfL * 2.0 * sinA;
 
     % ----- Arrowhead triangle vertices in world coords -----
-    % Arrow tip = heading point; base is perpendicular to heading
-    % at ~30% of halfL from centre, with half-width = halfW * 0.8
-    arrowBaseD = halfL * 0.30;          % distance from centre to arrow base
-    arrowHalfW = halfW * 0.80;         % half-width of arrow base
+    % Arrow tip = far ahead; base is at the front bumper, wider than the car!
+    arrowBaseD = halfL * 0.8;          % distance from centre to arrow base
+    arrowHalfW = halfW * 1.4;          % half-width of arrow base (wider than car)
 
     % Heading direction unit vector components are (cosA, sinA)
     % Perpendicular direction is (-sinA, cosA)
@@ -135,9 +134,9 @@ function h = draw_iv(ax, iv, mapHeight, scale, rotAngle, origCenter, rotCenter, 
         'BackgroundColor', [0.1 0.1 0.15]);
     set(h3, 'HitTest', 'off');
 
-    % Arrowhead triangle (filled, bright yellow-orange)
+    % Arrowhead triangle (filled, bright yellow, thick red border)
     h4 = patch(ax, arrPixC, arrPixR, [1 1 0], ...
-        'FaceAlpha', 1.0, 'EdgeColor', [1 0.6 0], 'LineWidth', 1.5);
+        'FaceAlpha', 1.0, 'EdgeColor', [1 0 0], 'LineWidth', 2.5);
     set(h4, 'HitTest', 'off');
 
     h = [h1; h2; h3; h4];
