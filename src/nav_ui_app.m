@@ -136,12 +136,17 @@ function app = nav_ui_app(projectRoot)
 
     % ---- OR-2  Local View ----
     t2 = uitab(tg,'Title','OR2:LocalView','BackgroundColor',BP);
-    lab(t2,[0.03 0.92 0.28 0.06],'Range(m):',FN,BP,FL);
+    lab(t2,[0.03 0.92 0.28 0.06],'Range (m):',FN,BP,FL);
     rgIn = uicontrol('Parent',t2,'Style','edit','Units','normalized', ...
         'Position',[0.32 0.92 0.18 0.06],'String','100','FontName',FN,'FontSize',9, ...
         'BackgroundColor',[.95 .95 .97]);
-    btn(t2,[0.53 0.92 0.44 0.06],'🔄 Update View',FN,BB,[1 1 1],@(~,~)updateLocalView(fig));
-    locAx = axes('Parent',t2,'Units','normalized','Position',[0.05 0.03 0.90 0.87], ...
+    btn(t2,[0.53 0.92 0.20 0.06],'Update',FN,BB,[1 1 1],@(~,~)updateLocalView(fig));
+    dirBtn = btn(t2,[0.75 0.92 0.22 0.06],'Show Direction',FN,BB,[1 1 1],@(~,~)onToggleLocalDirection(fig));
+    localInfo = uicontrol('Parent',t2,'Style','text','Units','normalized', ...
+        'Position',[0.03 0.85 0.94 0.045],'String','Circular local map centered at the selected IV', ...
+        'FontName',FN,'FontSize',9,'BackgroundColor',BP,'ForegroundColor',[.75 .78 .86], ...
+        'HorizontalAlignment','center');
+    locAx = axes('Parent',t2,'Units','normalized','Position',[0.05 0.03 0.90 0.80], ...
         'Color',[.1 .1 .14],'XTick',[],'YTick',[]); axis(locAx,'off');
     text(locAx,0.5,0.5,'Select an IV','Units','normalized', ...
         'HorizontalAlignment','center','Color',[.45 .48 .58],'FontSize',11);
@@ -200,6 +205,7 @@ function app = nav_ui_app(projectRoot)
     s.SkelWorldPts  = [];         s.SkelPixPts = [];
     % OR-5
     s.PathPixels    = [];         s.PathWorldPts = [];
+    s.ShowLocalDirection = false;
     % handles
     s.Figure = fig;   s.MapAxes = mapAx;  s.hImg = hImg;
     s.StatusBar = stBar;  s.ModeLabel = modeL;
@@ -208,6 +214,8 @@ function app = nav_ui_app(projectRoot)
     s.IVListbox = ivLB;   s.DistResult = dR;  s.TrajResult = tR;
     s.RotAngleInput = rotIn;
     s.RangeInput = rgIn;  s.LocalAxes = locAx;
+    s.LocalDirectionBtn = dirBtn;
+    s.LocalInfo = localInfo;
     s.SkelInfo = skelInfo; s.SkelAxes = skelAx;
     s.OR3Info = or3Info;
     s.SVAxes = svAx;
@@ -790,9 +798,26 @@ function updateLocalView(fig)
     rM=str2double(get(s.RangeInput,'String')); if isnan(rM)||rM<=0,rM=100;end
     [cR,cC]=world_to_pixel(iv.WorldX,iv.WorldY,s.MapHeight,s.Scale);
     rP=rM/s.Scale; li=local_map_view(s.MapImage,cR,cC,rP);
+    li=overlayLocalIV(li,iv,s.Scale,s.ShowLocalDirection);
     cla(s.LocalAxes); imshow(li,'Parent',s.LocalAxes);
     title(s.LocalAxes,sprintf('IV#%d R=%.0fm Sc=%g',iv.ID,rM,iv.ScaleFactor), ...
         'Color',[.85 .88 .95],'FontSize',9);
+end
+
+function onToggleLocalDirection(fig)
+    s = getappdata(fig,'AppState');
+    s.ShowLocalDirection = ~s.ShowLocalDirection;
+    if s.ShowLocalDirection
+        set(s.LocalDirectionBtn,'BackgroundColor',[.15 .15 .15],'ForegroundColor',[1 1 1]);
+        set(s.LocalDirectionBtn,'String','Hide Direction');
+        setSt(fig,'  OR2 local view: direction arrow shown.',[.55 .85 .60]);
+    else
+        set(s.LocalDirectionBtn,'BackgroundColor',[0.35 0.38 0.48],'ForegroundColor',[1 1 1]);
+        set(s.LocalDirectionBtn,'String','Show Direction');
+        setSt(fig,'  OR2 local view: direction arrow hidden.',[.55 .85 .60]);
+    end
+    setappdata(fig,'AppState',s);
+    updateLocalView(fig);
 end
 
 % #####################################################################
@@ -811,6 +836,68 @@ function [rR,rC] = o2r(oR,oC,s)
 end
 function setSt(fig,msg,clr)
     s=getappdata(fig,'AppState');set(s.StatusBar,'String',msg,'ForegroundColor',clr);
+end
+function outImg = overlayLocalIV(img,iv,mapScale,showDirection)
+    outImg = img;
+    [imgH,imgW,~] = size(outImg);
+    centerR = (imgH + 1) / 2;
+    centerC = (imgW + 1) / 2;
+    halfL = (iv.Length * iv.ScaleFactor) / (2 * mapScale);
+    halfW = (iv.Width * iv.ScaleFactor) / (2 * mapScale);
+    ang = iv.Angle * pi / 180;
+    cosA = cos(ang);
+    sinA = sin(ang);
+    % Keep the direction marker readable in OR2 and independent of IV scale.
+    arrowLen = 14;
+    shaftHalfW = 1.8;
+    headLen = 5;
+    headHalfW = 4.5;
+    radius = ceil(max(sqrt(halfL^2 + halfW^2), arrowLen + headHalfW)) + 3;
+    rMin = max(1,floor(centerR - radius));
+    rMax = min(imgH,ceil(centerR + radius));
+    cMin = max(1,floor(centerC - radius));
+    cMax = min(imgW,ceil(centerC + radius));
+    bodyColor = [60 150 255];
+    edgeColor = [255 220 60];
+    if nargin < 4
+        showDirection = false;
+    end
+    arrowColor = [0 0 0];
+    for r = rMin:rMax
+        for c = cMin:cMax
+            dx = c - centerC;
+            dy = centerR - r;
+            u = cosA * dx + sinA * dy;
+            v = -sinA * dx + cosA * dy;
+            isBody = abs(u) <= halfL && abs(v) <= halfW;
+            if abs(u) <= halfL && abs(v) <= halfW
+                if abs(abs(u) - halfL) <= 1 || abs(abs(v) - halfW) <= 1
+                    outImg(r,c,:) = reshape(uint8(edgeColor),1,1,3);
+                else
+                    for ch = 1:3
+                        baseVal = double(outImg(r,c,ch));
+                        mixVal = 0.62 * baseVal + 0.38 * bodyColor(ch);
+                        outImg(r,c,ch) = uint8(round(mixVal));
+                    end
+                end
+            end
+            if showDirection
+                inShaft = (u >= 0) && (u <= arrowLen - headLen) && (abs(v) <= shaftHalfW);
+                headBaseU = arrowLen - headLen;
+                inHead = (u >= headBaseU) && (u <= arrowLen);
+                if inHead
+                    vLimit = headHalfW * (arrowLen - u) / max(headLen, 0.1);
+                else
+                    vLimit = -1;
+                end
+                if inShaft || (inHead && abs(v) <= vLimit)
+                    if ~isBody || u >= halfL * 0.10
+                        outImg(r,c,:) = reshape(uint8(arrowColor),1,1,3);
+                    end
+                end
+            end
+        end
+    end
 end
 function flashError(fig,msg)
 %FLASHERROR  Show error message with flashing red background (P4).
