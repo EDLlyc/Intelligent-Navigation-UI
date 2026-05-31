@@ -8,6 +8,13 @@ function [pathR, pathC] = road_path_bfs(roadMask, startR, startC, endR, endC)
 %
 %   Pre-allocates the queue for efficiency in MATLAB.
 
+    % Edge Case Guard: Start and End are the same point
+    if startR == endR && startC == endC
+        pathR = double(startR);
+        pathC = double(startC);
+        return;
+    end
+
     [H, W] = size(roadMask);
 
     visited = false(H, W);
