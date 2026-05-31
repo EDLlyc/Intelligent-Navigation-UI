@@ -476,13 +476,67 @@ end
 function onReportIV(fig)
     clearIVSelection(fig);
     s=getappdata(fig,'AppState');
-    if isempty(s.IVList),msgbox('No IVs loaded.','Report','warn');return;end
-    lines=cell(1,length(s.IVList));
-    for k=1:length(s.IVList),iv=s.IVList(k);
-        lines{k}=sprintf('IV #%d: X=%.1f m, Y=%.1f m, Angle=%.1f',iv.ID,iv.WorldX,iv.WorldY,iv.Angle);
+    if isempty(s.IVList)
+        errordlg('No IVs loaded on the map. Please add some IVs first.','Report Error','modal');
+        return;
     end
-    msgbox(lines,'IV Position Report','help');
-    setSt(fig,sprintf('  Reported %d IVs.',length(s.IVList)),[.4 .9 .5]);
+    
+    n = length(s.IVList);
+    
+    % ---- 创建现代深色模态对话框 ----
+    ss = get(0,'ScreenSize');
+    dw = 550; dh = 320;
+    dfig = figure('Name','IV Positions Summary Report','NumberTitle','off', ...
+        'Color',[.18 .20 .25],'MenuBar','none','ToolBar','none', ...
+        'Position',[(ss(3)-dw)/2 (ss(4)-dh)/2 dw dh],'Resize','off', ...
+        'WindowStyle','modal');
+        
+    % ---- 顶部标题 ----
+    uicontrol('Parent',dfig,'Style','text','Units','normalized', ...
+        'Position',[0.03 0.88 0.94 0.08],'String','INTELLIGENT VEHICLE STATE REPORT', ...
+        'FontName','Segoe UI','FontSize',11,'FontWeight','bold', ...
+        'BackgroundColor',[.18 .20 .25],'ForegroundColor',[.55 .85 .60], ...
+        'HorizontalAlignment','center');
+        
+    % ---- 构建表格数据 ----
+    colNames = {'IV ID', 'X (meters)', 'Y (meters)', 'Heading (deg)', 'Scale Factor', 'Pixel (C, R)'};
+    data = cell(n, 6);
+    for k = 1:n
+        iv = s.IVList(k);
+        % 利用 world_to_pixel 计算小车原图像素坐标
+        [pr, pc] = world_to_pixel(iv.WorldX, iv.WorldY, s.MapHeight, s.Scale);
+        data{k, 1} = sprintf('IV #%d', iv.ID);
+        data{k, 2} = sprintf('%.1f m', iv.WorldX);
+        data{k, 3} = sprintf('%.1f m', iv.WorldY);
+        data{k, 4} = sprintf('%.1f deg', iv.Angle);
+        data{k, 5} = sprintf('%.2f', iv.ScaleFactor);
+        data{k, 6} = sprintf('(%d, %d)', pc, pr);
+    end
+    
+    % ---- 创建现代 uitable 表格 ----
+    uitable('Parent',dfig,'Units','normalized', ...
+        'Position',[0.05 0.22 0.90 0.62], ...
+        'Data',data,'ColumnName',colNames, ...
+        'ColumnWidth',{60, 95, 95, 95, 80, 90}, ...
+        'RowName',[], ...
+        'BackgroundColor',[.24 .26 .32; .28 .30 .36], ...
+        'ForegroundColor',[.95 .95 .98]);
+        
+    % ---- 底部汇总信息与关闭按钮 ----
+    summaryStr = sprintf('Total Active IVs: %d  |  Coordinate System: Bottom-Left (0,0)', n);
+    uicontrol('Parent',dfig,'Style','text','Units','normalized', ...
+        'Position',[0.05 0.08 0.65 0.08], ...
+        'String',summaryStr,'FontName','Segoe UI','FontSize',9, ...
+        'BackgroundColor',[.18 .20 .25],'ForegroundColor',[.85 .88 .95], ...
+        'HorizontalAlignment','left');
+        
+    uicontrol('Parent',dfig,'Style','pushbutton','Units','normalized', ...
+        'Position',[0.75 0.06 0.20 0.11], ...
+        'String','Close','FontName','Segoe UI','FontSize',9,'FontWeight','bold', ...
+        'BackgroundColor',[.25 .55 .85],'ForegroundColor',[1 1 1], ...
+        'Callback',@(~,~)delete(dfig));
+        
+    setSt(fig,sprintf('  Reported %d IVs via summary table.',n),[.4 .9 .5]);
 end
 function onDistBtn(fig)
     clearIVSelection(fig);
