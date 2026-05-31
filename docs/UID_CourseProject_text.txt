@@ -1,0 +1,95 @@
+ISE 333: User Interface Development (Design)
+Course Project - An Intelligent Navigation UI
+Spring 2026
+Instructor: Hao LiAn Intelligent Navigation UI
+• Map For UI
+• Download the map image file “MapForUI.jpg” that is 803x1404 pixels
+• A pixel in the map image represents 1.7 meters in the real world
+• Take the left-bottom corner as the origin of the real-world coordinates system
+• Only roads in the map are navigable
+• Intelligent Vehicles (IVs) For UI
+• Each IV is represented by a rectangle 
+of size 8 meters by 3 meters
+• The visualization size of each IV is 
+adjustable according to certain scaling 
+factorAn Intelligent Navigation UI
+• Pedagogical Awareness
+• The project is purely for pedagogical purpose rather than practical application 
+• Hard Requirements
+• Only in Matlab
+• Implementation in other languages is NOT accepted !
+• Main script that boots the UI is necessary
+• Do not need to do any ad hoc configuration
+• Can launch the UI simply by running the main script
+• Afterwards, all relevant operations can and should be done via the UI only
+• Minimum usage of built-in functions
+• Usage of basic mathematical built-in functions is allowed
+• Usage of basic image I/O (imread/imshow) and Matlab UI controls is allowed
+• Usage of others is NOT accepted !
+It is not the result but the observable process that mattersAn Intelligent Navigation UI
+• Basic UI Requirements
+• Can launch the UI simply by running the main script, after which the Matlab 
+command line interface should no longer be involved in following operations
+• Can load the map for visualization
+• Whenever clicking on a point in the map, display its real-world position 
+(namely its coordinates)
+• Can load an IV (or multiple IVs) into the map
+• The UI should provide a way to initiate loading of a new IV
+• Load the IV by clicking on a point (namely the loaded point) in the map
+• The IV should be loaded onto roads which are the only navigable part in the map and 
+hence there should be a mechanism to check whether the loaded point is valid or not
+• If the loaded point is invalid, an error message should be given
+• If the loaded point is valid, the map with the newly-added IV as well as already-existing 
+IVs is visualizedAn Intelligent Navigation UI
+• Basic UI Requirements
+• IV loading with adjustable orientation
+• The UI should provide a way of adjusting the IV orientation besides above basic requirements
+• Can remove an IV from the map
+• The UI should provide a way to remove an unneeded IV while keeping other IVs not touched
+• Re-visualize the map after update of the IVs
+• Can report real-world positions of all loaded IVs
+• Can display the real-world distance of two clicked points in the map
+• Can display the real-world length of a trajectory characterized by a sequence of 
+continuously clicked point
+• Can rotate the map
+• The UI should provide a way to specify a degree of rotation
+• The map rotated by the specified degree is visualizedAn Intelligent Navigation UI
+• Optional UI Requirements
+• Distributed Assignment
+• Each student takes one optional requirement and this part is scored independently
+• OR 1: Road skeleton extraction
+• The UI provide a way to manually extract the road skeleton (partially)
+• The UI can visualize the extracted road skeleton according to its real-word configuration
+• The UI can visualize only the (roughly) road part attached to the extracted road skeleton 
+in the map
+• OR 2: Scale and local visualization
+• The UI can adjust the visualization size of the IV according to a scaling factor adjustable
+• The UI can visualize only the local map of the IV according to a range adjustable
+• The local map is a circle centered at the IV and its radius is the specified range
+• The visualized local map should conform to the specified range strictlyAn Intelligent Navigation UI
+• Optional UI Requirements
+• OR 3: IV loading with orientation aligned automatically
+• Besides previous basic requirements of IV loading, the IV orientation should be aligned 
+automatically with the road
+• Can visualize the map together with the IV in certain rotated way as if the IV is always 
+heading upward
+• OR 4: Virtual street view generation
+• Can generate the virtual stree view associated with an arbitrary road point as if it was 
+captured at that point
+• OR 5: Path planning
+• Given two arbitrary map points, can find their closest road points respectively
+• Can find the shortest road path between the two road points and visualize the shortest 
+road path on the mapAn Intelligent Navigation UI
+• Submission Requirements
+• All Matlab scripts
+• Packaged into one zip file
+• Technical report
+• Describing your idea of UID
+• Describing how to use all the aspects of the UI
+• Describing how optional requirements are assigned to group members respectively
+• Submission by email
+• Only one student of the group (say the group leader) sends an email to Prof. Li
+• The email should contain the packaged Matlab scripts as well as the technical report
+• The email should give a complete list of all group members
+• Attention on Prof. Li’s acknowledgement of receptionDISCUSSION
+Q & A

@@ -1,5 +1,5 @@
 function h = draw_iv(ax, iv, mapHeight, scale, rotAngle, origCenter, rotCenter, isSelected, isHovered)
-%DRAW_IV Draw an IV rectangle (with heading indicator) on map axes.
+%DRAW_IV Draw an IV using basic line primitives only.
 %   h = draw_iv(ax, iv, mapHeight, scale, rotAngle, origCenter, rotCenter)
 %
 %   Inputs:
@@ -12,7 +12,7 @@ function h = draw_iv(ax, iv, mapHeight, scale, rotAngle, origCenter, rotCenter, 
 %     rotCenter  - [cx, cy] of rotated image centre
 %
 %   Output:
-%     h - column vector of graphics handles (patch, line, text)
+%     h - column vector of graphics handles
 
     % ----- Colour palette (cycles by IV id) -----
     palette = [ ...
@@ -101,39 +101,32 @@ function h = draw_iv(ax, iv, mapHeight, scale, rotAngle, origCenter, rotCenter, 
     if nargin < 8, isSelected = false; end
     if nargin < 9, isHovered = false; end
 
-    % ----- Configure Patch Style based on Selected/Hovered status -----
+    % ----- Configure line style based on Selected/Hovered status -----
     if isSelected
-        % 选中高亮反馈：金黄色极粗边框，完全不透明
         edgeClr = [1 0.85 0];
         lineWidth = 3.5;
-        faceAlpha = 1.0;
     elseif isHovered
-        % 鼠标滑过悬浮初始交互：亮橙色中等粗边框，微透明
         edgeClr = [1 0.6 0.1];
         lineWidth = 2.0;
-        faceAlpha = 0.9;
     else
-        % 默认状态：常规黑色细边框，中度透明
-        edgeClr = 'k';
-        lineWidth = 1;
-        faceAlpha = 0.75;
+        edgeClr = faceClr;
+        lineWidth = 1.5;
     end
 
-    % ----- Draw -----
-    h1 = patch(ax, pixC, pixR, faceClr, ...
-        'FaceAlpha', faceAlpha, 'EdgeColor', edgeClr, 'LineWidth', lineWidth, ...
-        'PickableParts', 'none');
+    % ----- Draw outline and heading indicator -----
+    polyC = [pixC; pixC(1)];
+    polyR = [pixR; pixR(1)];
+    h1 = plot(ax, polyC, polyR, '-', 'Color', edgeClr, 'LineWidth', lineWidth);
     set(h1, 'HitTest', 'off');
 
-
-    h2 = patch(ax, arrowC, arrowR, [1 0.1 0.1], ...
-        'FaceAlpha', 0.9, 'EdgeColor', 'k', 'LineWidth', 1.5, ...
-        'PickableParts', 'none');
+    h2 = plot(ax, [centC arrowC(1)], [centR arrowR(1)], '-', ...
+        'Color', [1 0.1 0.1], 'LineWidth', max(1.5, lineWidth));
     set(h2, 'HitTest', 'off');
 
+    h3 = plot(ax, [arrowC; arrowC(1)], [arrowR; arrowR(1)], '-', ...
+        'Color', [1 0.3 0.1], 'LineWidth', 1.2);
+    set(h3, 'HitTest', 'off');
 
-    % Calculate screen direction to place text behind the car
-    % (We choose not to draw text on map to conform strictly to 8mx3m scale, keeping it clean)
-    h = [h1; h2];
+    h = [h1; h2; h3];
 end
 

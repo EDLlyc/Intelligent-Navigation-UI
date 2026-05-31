@@ -48,54 +48,55 @@ function app = nav_ui_app(projectRoot)
 
     % ---- Mode indicator ----
     modeL = uicontrol('Parent',rp,'Style','text','Units','normalized', ...
-        'Position',[0.03 0.97 0.94 0.025],'String','Mode: Idle', ...
-        'FontName',FN,'FontSize',11,'FontWeight','bold', ...
+        'Position',[0.03 0.965 0.94 0.03],'String','Mode: Idle', ...
+        'FontName',FN,'FontSize',12,'FontWeight','bold', ...
         'BackgroundColor',BP,'ForegroundColor',FO,'HorizontalAlignment','center');
 
     % ========== VEHICLE CONTROLS ==========
     sep(rp,0.96,BB); stit(rp,0.94,'VEHICLE CONTROLS',FN,BP,FS);
 
-    lab(rp,[0.03 0.915 0.28 0.022],'Heading(deg):',FN,BP,FL);
+    lab(rp,[0.03 0.913 0.28 0.028],'Heading(deg):',FN,BP,FL);
     angIn = uicontrol('Parent',rp,'Style','edit','Units','normalized', ...
-        'Position',[0.32 0.915 0.14 0.022],'String','0','FontName',FN,'FontSize',9, ...
+        'Position',[0.32 0.913 0.14 0.028],'String','0','FontName',FN,'FontSize',9, ...
         'BackgroundColor',[.95 .95 .97]);
-    lab(rp,[0.50 0.915 0.18 0.022],'Scale:',FN,BP,FL);
+    lab(rp,[0.50 0.913 0.18 0.028],'Scale:',FN,BP,FL);
     scIn = uicontrol('Parent',rp,'Style','edit','Units','normalized', ...
-        'Position',[0.68 0.915 0.14 0.022],'String','1','FontName',FN,'FontSize',9, ...
+        'Position',[0.68 0.913 0.14 0.028],'String','1','FontName',FN,'FontSize',9, ...
         'BackgroundColor',[.95 .95 .97]);
 
-    btn(rp,[0.03 0.885 0.30 0.028],'Add IV',FN,BA,[1 1 1],@(~,~)onAddIV(fig));
-    btn(rp,[0.35 0.885 0.30 0.028],'Remove IV',FN,[.7 .3 .3],[1 1 1],@(~,~)onRemoveIV(fig));
-    btn(rp,[0.67 0.885 0.30 0.028],'Report All',FN,BB,[1 1 1],@(~,~)onReportIV(fig));
+    btn(rp,[0.03 0.878 0.30 0.034],'Add IV',FN,BA,[1 1 1],@(~,~)onAddIV(fig));
+    btn(rp,[0.35 0.878 0.30 0.034],'Remove IV',FN,[.7 .3 .3],[1 1 1],@(~,~)onRemoveIV(fig));
+    btn(rp,[0.67 0.878 0.30 0.034],'Report All',FN,BB,[1 1 1],@(~,~)onReportIV(fig));
 
-    lab(rp,[0.03 0.86 0.94 0.02],'Loaded IVs:',FN,BP,FL);
+    lab(rp,[0.03 0.852 0.94 0.024],'Loaded IVs:',FN,BP,FL);
     ivLB = uicontrol('Parent',rp,'Style','listbox','Units','normalized', ...
-        'Position',[0.03 0.77 0.94 0.088],'String',{'(none)'},'Value',1, ...
+        'Position',[0.03 0.766 0.94 0.085],'String',{'(none)'},'Value',1, ...
         'FontName',FN,'FontSize',9, ...
         'BackgroundColor',[.28 .30 .36],'ForegroundColor',[.9 .9 .95], ...
         'Callback',@(~,~)onListboxSelect(fig));
 
     % ========== MEASUREMENT ==========
     sep(rp,0.76,BB); stit(rp,0.74,'MEASUREMENT',FN,BP,FS);
-    btn(rp,[0.03 0.71 0.30 0.028],'Distance',FN,BB,[1 1 1],@(~,~)onDistBtn(fig));
-    btn(rp,[0.35 0.71 0.30 0.028],'Trajectory',FN,BB,[1 1 1],@(~,~)onTrajBtn(fig));
-    btn(rp,[0.67 0.71 0.30 0.028],'Clear',FN,BB,[1 1 1],@(~,~)onClearMeas(fig));
+    btn(rp,[0.03 0.705 0.30 0.034],'Distance',FN,BB,[1 1 1],@(~,~)onDistBtn(fig));
+    btn(rp,[0.35 0.705 0.30 0.034],'Trajectory',FN,BB,[1 1 1],@(~,~)onTrajBtn(fig));
+    btn(rp,[0.67 0.705 0.30 0.034],'Clear',FN,BB,[1 1 1],@(~,~)onClearMeas(fig));
     dR = uicontrol('Parent',rp,'Style','text','Units','normalized', ...
-        'Position',[0.03 0.685 0.45 0.022],'String','Dist: --', ...
+        'Position',[0.03 0.676 0.45 0.026],'String','Dist: --', ...
         'FontName',FN,'FontSize',9,'BackgroundColor',BP,'ForegroundColor',FL, ...
         'HorizontalAlignment','left');
     tR = uicontrol('Parent',rp,'Style','text','Units','normalized', ...
-        'Position',[0.50 0.685 0.47 0.022],'String','Traj: --', ...
+        'Position',[0.50 0.676 0.47 0.026],'String','Traj: --', ...
         'FontName',FN,'FontSize',9,'BackgroundColor',BP,'ForegroundColor',FL, ...
         'HorizontalAlignment','left');
 
     % ========== MAP ROTATION ==========
     sep(rp,0.675,BB); stit(rp,0.655,'MAP ROTATION',FN,BP,FS);
-    lab(rp,[0.03 0.63 0.25 0.022],'Angle(deg):',FN,BP,FL);
+    lab(rp,[0.03 0.627 0.25 0.028],'Angle(deg):',FN,BP,FL);
     rotIn = uicontrol('Parent',rp,'Style','edit','Units','normalized', ...
-        'Position',[0.29 0.63 0.16 0.022],'String','0','FontName',FN,'FontSize',9, ...
+        'Position',[0.29 0.627 0.16 0.028],'String','0','FontName',FN,'FontSize',9, ...
         'BackgroundColor',[.95 .95 .97]);
-    btn(rp,[0.48 0.625 0.49 0.028],'Rotate Map',FN,BB,[1 1 1],@(~,~)onRotate(fig));
+    btn(rp,[0.47 0.623 0.31 0.034],'Rotate Map',FN,BB,[1 1 1],@(~,~)onRotate(fig));
+    btn(rp,[0.80 0.623 0.17 0.034],'Reset',FN,[.55 .30 .30],[1 1 1],@(~,~)onResetRotation(fig));
 
     % ========== OR TABS ==========
     sep(rp,0.61,BB);
@@ -119,12 +120,17 @@ function app = nav_ui_app(projectRoot)
 
     % ---- OR-2  Local View ----
     t2 = uitab(tg,'Title','OR2:LocalView','BackgroundColor',BP);
-    lab(t2,[0.03 0.92 0.28 0.06],'Range(m):',FN,BP,FL);
+    lab(t2,[0.03 0.92 0.28 0.06],'Range (m):',FN,BP,FL);
     rgIn = uicontrol('Parent',t2,'Style','edit','Units','normalized', ...
         'Position',[0.32 0.92 0.18 0.06],'String','100','FontName',FN,'FontSize',9, ...
         'BackgroundColor',[.95 .95 .97]);
-    btn(t2,[0.53 0.92 0.44 0.06],'Update View',FN,BB,[1 1 1],@(~,~)updateLocalView(fig));
-    locAx = axes('Parent',t2,'Units','normalized','Position',[0.05 0.03 0.90 0.87], ...
+    btn(t2,[0.53 0.92 0.20 0.06],'Update',FN,BB,[1 1 1],@(~,~)updateLocalView(fig));
+    dirBtn = btn(t2,[0.75 0.92 0.22 0.06],'Show Direction',FN,BB,[1 1 1],@(~,~)onToggleLocalDirection(fig));
+    localInfo = uicontrol('Parent',t2,'Style','text','Units','normalized', ...
+        'Position',[0.03 0.85 0.94 0.045],'String','Circular local map centered at the selected IV', ...
+        'FontName',FN,'FontSize',9,'BackgroundColor',BP,'ForegroundColor',[.75 .78 .86], ...
+        'HorizontalAlignment','center');
+    locAx = axes('Parent',t2,'Units','normalized','Position',[0.05 0.03 0.90 0.80], ...
         'Color',[.1 .1 .14],'XTick',[],'YTick',[]); axis(locAx,'off');
     text(locAx,0.5,0.5,'Select an IV','Units','normalized', ...
         'HorizontalAlignment','center','Color',[.45 .48 .58],'FontSize',11);
@@ -180,10 +186,13 @@ function app = nav_ui_app(projectRoot)
     s.InteractiveMode = 'idle';
     s.IVList        = [];         s.NextIVID = 1;
     s.SelectedIVIdx = 0;          s.HoveredIVIdx = 0;          s.TempPoints    = [];
+    s.DistPixPts    = [];         s.DistanceValue = NaN;
+    s.TrajPixPts    = [];         s.TrajValue = NaN;
     % OR-1
     s.SkelWorldPts  = [];         s.SkelPixPts = [];
     % OR-5
     s.PathPixels    = [];         s.PathWorldPts = [];
+    s.ShowLocalDirection = false;
     % handles
     s.Figure = fig;   s.MapAxes = mapAx;  s.hImg = hImg;
     s.StatusBar = stBar;  s.ModeLabel = modeL;
@@ -191,6 +200,8 @@ function app = nav_ui_app(projectRoot)
     s.IVListbox = ivLB;   s.DistResult = dR;  s.TrajResult = tR;
     s.RotAngleInput = rotIn;
     s.RangeInput = rgIn;  s.LocalAxes = locAx;
+    s.LocalDirectionBtn = dirBtn;
+    s.LocalInfo = localInfo;
     s.SkelInfo = skelInfo; s.SkelAxes = skelAx;
     s.OR3Info = or3Info;
     s.SVAxes = svAx;
@@ -271,12 +282,13 @@ function onMapClick(fig)
             sf=str2double(get(s.ScaleInput,'String')); if isnan(sf)||sf<=0,sf=1;end
             niv=create_iv(s.NextIVID,wx,wy,a,sf);
             if isempty(s.IVList),s.IVList=niv;else,s.IVList(end+1)=niv;end
-            s.NextIVID=s.NextIVID+1; s.InteractiveMode='idle';
+            s.NextIVID=s.NextIVID+1;
             s.SelectedIVIdx = 0; % 新加车默认不带光圈
-            set(s.ModeLabel,'String','Mode: Idle','ForegroundColor',[.55 .85 .60]);
+            set(s.ModeLabel,'String','Mode: ADD IV','ForegroundColor',[.25 .55 .85]);
             setappdata(fig,'AppState',s); refreshDisp(fig); updateIVLB(fig);
             s = getappdata(fig,'AppState');
-            setSt(fig,sprintf('  IV #%d at (%.1f,%.1f) angle=%.1f',niv.ID,wx,wy,a),[.4 .9 .5]);
+            setSt(fig,sprintf('  IV #%d at (%.1f,%.1f) angle=%.1f. Continue clicking to add more IVs.', ...
+                niv.ID,wx,wy,a),[.4 .9 .5]);
         else
             setSt(fig,'  Not on road! Click a road area.',[1 .4 .4]);
         end; return;
@@ -303,12 +315,11 @@ function onMapClick(fig)
         end; return;
 
     case 'measure_dist'
-        s.TempPoints=[s.TempPoints; wx wy cC cR];
+        s.TempPoints=[s.TempPoints; wx wy oR oC];
         n=size(s.TempPoints,1);
-        hold(s.MapAxes,'on');
-        hm=plot(s.MapAxes,cC,cR,'ro','MarkerSize',10,'LineWidth',2,'MarkerFaceColor',[1 .3 .3]);
-        set(hm,'HitTest','off');
         if n==1
+            setappdata(fig,'AppState',s); refreshDisp(fig);
+            s = getappdata(fig,'AppState');
             if clickedIVIdx > 0
                 setSt(fig,sprintf('  Pt1:(%.1f,%.1f)%s click 2nd...',wx,wy,clickedIVStr),[1 .8 .3]);
             else
@@ -317,11 +328,8 @@ function onMapClick(fig)
         else
             p1=s.TempPoints(1,:); p2=s.TempPoints(2,:);
             d=sqrt((p2(1)-p1(1))^2+(p2(2)-p1(2))^2);
-            hl=plot(s.MapAxes,[p1(3) p2(3)],[p1(4) p2(4)],'r-','LineWidth',2);set(hl,'HitTest','off');
-            ht=text(s.MapAxes,(p1(3)+p2(3))/2,(p1(4)+p2(4))/2-15, ...
-                sprintf('%.1f m',d),'Color','w','FontSize',10,'FontWeight','bold', ...
-                'BackgroundColor',[.8 .15 .15],'HorizontalAlignment','center');
-            set(ht,'HitTest','off');
+            s.DistPixPts=s.TempPoints(:,3:4);
+            s.DistanceValue=d;
             set(s.DistResult,'String',sprintf('Dist: %.2f m',d));
             if clickedIVIdx > 0
                 setSt(fig,sprintf('  Distance = %.2f m (to IV #%d)',d,s.IVList(clickedIVIdx).ID),[.4 .9 .5]);
@@ -330,24 +338,21 @@ function onMapClick(fig)
             end
             s.InteractiveMode='idle'; s.TempPoints=[];
             set(s.ModeLabel,'String','Mode: Idle','ForegroundColor',[.55 .85 .60]);
+            setappdata(fig,'AppState',s); refreshDisp(fig);
+            s = getappdata(fig,'AppState');
         end
-        hold(s.MapAxes,'off');
 
     case 'measure_traj'
-        s.TempPoints=[s.TempPoints; wx wy cC cR];
+        s.TempPoints=[s.TempPoints; wx wy oR oC];
         n=size(s.TempPoints,1);
-        hold(s.MapAxes,'on');
-        hm=plot(s.MapAxes,cC,cR,'bs','MarkerSize',8,'LineWidth',2,'MarkerFaceColor',[.3 .5 1]);
-        set(hm,'HitTest','off');
-        if n>=2
-            hl=plot(s.MapAxes,[s.TempPoints(n-1,3) cC],[s.TempPoints(n-1,4) cR],'b-','LineWidth',2);
-            set(hl,'HitTest','off');
-        end
-        hold(s.MapAxes,'off');
         tLen=0;
         for k=2:n,dx=s.TempPoints(k,1)-s.TempPoints(k-1,1);dy=s.TempPoints(k,2)-s.TempPoints(k-1,2);
             tLen=tLen+sqrt(dx^2+dy^2);end
+        s.TrajPixPts=s.TempPoints(:,3:4);
+        s.TrajValue=tLen;
         set(s.TrajResult,'String',sprintf('Traj: %.2f m',tLen));
+        setappdata(fig,'AppState',s); refreshDisp(fig);
+        s = getappdata(fig,'AppState');
         if clickedIVIdx > 0
             setSt(fig,sprintf('  Trajectory pt on IV #%d: %d pts, %.2f m',s.IVList(clickedIVIdx).ID,n,tLen),[.3 .7 1]);
         else
@@ -454,7 +459,7 @@ function onAddIV(fig)
     clearIVSelection(fig);
     s=getappdata(fig,'AppState'); s.InteractiveMode='add_iv'; s.TempPoints=[];
     set(s.ModeLabel,'String','Mode: ADD IV','ForegroundColor',[.25 .55 .85]);
-    setappdata(fig,'AppState',s); setSt(fig,'  Click a road to place IV.',[1 .8 .3]);
+    setappdata(fig,'AppState',s); setSt(fig,'  Click road points continuously to place IVs.',[1 .8 .3]);
 end
 function onRemoveIV(fig)
     clearIVSelection(fig);
@@ -477,7 +482,7 @@ function onReportIV(fig)
     clearIVSelection(fig);
     s=getappdata(fig,'AppState');
     if isempty(s.IVList)
-        errordlg('No IVs loaded on the map. Please add some IVs first.','Report Error','modal');
+        setSt(fig,'  No IVs loaded on the map.',[1 .4 .4]);
         return;
     end
     
@@ -498,29 +503,13 @@ function onReportIV(fig)
         'BackgroundColor',[.18 .20 .25],'ForegroundColor',[.55 .85 .60], ...
         'HorizontalAlignment','center');
         
-    % ---- 构建表格数据 ----
-    colNames = {'IV ID', 'X (meters)', 'Y (meters)', 'Heading (deg)', 'Scale Factor', 'Pixel (C, R)'};
-    data = cell(n, 6);
-    for k = 1:n
-        iv = s.IVList(k);
-        % 利用 world_to_pixel 计算小车原图像素坐标
-        [pr, pc] = world_to_pixel(iv.WorldX, iv.WorldY, s.MapHeight, s.Scale);
-        data{k, 1} = sprintf('IV #%d', iv.ID);
-        data{k, 2} = sprintf('%.1f m', iv.WorldX);
-        data{k, 3} = sprintf('%.1f m', iv.WorldY);
-        data{k, 4} = sprintf('%.1f deg', iv.Angle);
-        data{k, 5} = sprintf('%.2f', iv.ScaleFactor);
-        data{k, 6} = sprintf('(%d, %d)', pc, pr);
-    end
-    
-    % ---- 创建现代 uitable 表格 ----
-    uitable('Parent',dfig,'Units','normalized', ...
+    reportLines = buildIVReportLines(s);
+    uicontrol('Parent',dfig,'Style','listbox','Units','normalized', ...
         'Position',[0.05 0.22 0.90 0.62], ...
-        'Data',data,'ColumnName',colNames, ...
-        'ColumnWidth',{60, 95, 95, 95, 80, 90}, ...
-        'RowName',[], ...
-        'BackgroundColor',[.24 .26 .32; .28 .30 .36], ...
-        'ForegroundColor',[.95 .95 .98]);
+        'String',reportLines,'Value',1, ...
+        'FontName','Consolas','FontSize',10, ...
+        'BackgroundColor',[.24 .26 .32],'ForegroundColor',[.95 .95 .98], ...
+        'Min',0,'Max',1);
         
     % ---- 底部汇总信息与关闭按钮 ----
     summaryStr = sprintf('Total Active IVs: %d  |  Coordinate System: Bottom-Left (0,0)', n);
@@ -536,23 +525,29 @@ function onReportIV(fig)
         'BackgroundColor',[.25 .55 .85],'ForegroundColor',[1 1 1], ...
         'Callback',@(~,~)delete(dfig));
         
-    setSt(fig,sprintf('  Reported %d IVs via summary table.',n),[.4 .9 .5]);
+    setSt(fig,sprintf('  Reported %d IVs.',n),[.4 .9 .5]);
 end
 function onDistBtn(fig)
     clearIVSelection(fig);
     s=getappdata(fig,'AppState'); s.InteractiveMode='measure_dist'; s.TempPoints=[];
+    s.DistPixPts=[]; s.DistanceValue=NaN;
+    set(s.DistResult,'String','Dist: --');
     set(s.ModeLabel,'String','Mode: DISTANCE','ForegroundColor',[1 .45 .45]);
-    setappdata(fig,'AppState',s); setSt(fig,'  Click first point...',[1 .8 .3]);
+    setappdata(fig,'AppState',s); refreshDisp(fig); setSt(fig,'  Click first point...',[1 .8 .3]);
 end
 function onTrajBtn(fig)
     clearIVSelection(fig);
     s=getappdata(fig,'AppState'); s.InteractiveMode='measure_traj'; s.TempPoints=[];
+    s.TrajPixPts=[]; s.TrajValue=NaN;
+    set(s.TrajResult,'String','Traj: --');
     set(s.ModeLabel,'String','Mode: TRAJECTORY','ForegroundColor',[.3 .7 1]);
-    setappdata(fig,'AppState',s); setSt(fig,'  Click points to build trajectory...',[1 .8 .3]);
+    setappdata(fig,'AppState',s); refreshDisp(fig); setSt(fig,'  Click points to build trajectory...',[1 .8 .3]);
 end
 function onClearMeas(fig)
     clearIVSelection(fig);
     s=getappdata(fig,'AppState'); s.InteractiveMode='idle'; s.TempPoints=[];
+    s.DistPixPts=[]; s.DistanceValue=NaN;
+    s.TrajPixPts=[]; s.TrajValue=NaN;
     set(s.ModeLabel,'String','Mode: Idle','ForegroundColor',[.55 .85 .60]);
     set(s.DistResult,'String','Dist: --'); set(s.TrajResult,'String','Traj: --');
     setappdata(fig,'AppState',s); refreshDisp(fig); setSt(fig,'  Cleared.',[.55 .85 .60]);
@@ -563,11 +558,26 @@ function onRotate(fig)
     a=str2double(get(s.RotAngleInput,'String'));
     if isnan(a),setSt(fig,'  Invalid angle.',[1 .4 .4]);return;end
     setSt(fig,'  Rotating...',[1 .8 .3]); drawnow;
-    s.RotationAngle=a;
-    if abs(a)<0.001, s.RotatedImage=s.MapImage; s.RotCenter=s.OrigCenter;
-    else,[ri,nh,nw]=rotate_map(s.MapImage,a); s.RotatedImage=ri; s.RotCenter=[(nw+1)/2 (nh+1)/2];end
+    s.RotationAngle=s.RotationAngle+a;
+    if abs(s.RotationAngle)<0.001
+        s.RotationAngle=0;
+        s.RotatedImage=s.MapImage; s.RotCenter=s.OrigCenter;
+    else
+        [ri,nh,nw]=rotate_map(s.MapImage,s.RotationAngle);
+        s.RotatedImage=ri; s.RotCenter=[(nw+1)/2 (nh+1)/2];
+    end
     setappdata(fig,'AppState',s); refreshDisp(fig);
-    setSt(fig,sprintf('  Rotated %.1f deg.',a),[.4 .9 .5]);
+    setSt(fig,sprintf('  Rotated %.1f deg. Current total rotation: %.1f deg.',a,s.RotationAngle),[.4 .9 .5]);
+end
+function onResetRotation(fig)
+    clearIVSelection(fig);
+    s=getappdata(fig,'AppState');
+    s.RotationAngle=0;
+    s.RotatedImage=s.MapImage;
+    s.RotCenter=s.OrigCenter;
+    set(s.RotAngleInput,'String','0');
+    setappdata(fig,'AppState',s); refreshDisp(fig);
+    setSt(fig,'  Map rotation reset to initial state.',[.55 .85 .60]);
 end
 
 % ---------- OR-1 Skeleton ----------
@@ -701,7 +711,8 @@ end
 function refreshDisp(fig)
     s=getappdata(fig,'AppState');
     cla(s.MapAxes);
-    hI=imshow(s.RotatedImage,'Parent',s.MapAxes);
+    dispImage = renderOverlayImage(s);
+    hI=imshow(dispImage,'Parent',s.MapAxes);
     set(hI,'ButtonDownFcn',s.ClickCB);
     hold(s.MapAxes,'on');
     oc=s.OrigCenter; rc=s.RotCenter;
@@ -727,6 +738,7 @@ function refreshDisp(fig)
         end
         hp=plot(s.MapAxes,pc,pr,'m-','LineWidth',3);set(hp,'HitTest','off');
     end
+    drawMeasurementOverlay(s);
     hold(s.MapAxes,'off');
     s.hImg=hI; setappdata(fig,'AppState',s);
     updateLocalView(fig);
@@ -762,9 +774,26 @@ function updateLocalView(fig)
     rM=str2double(get(s.RangeInput,'String')); if isnan(rM)||rM<=0,rM=100;end
     [cR,cC]=world_to_pixel(iv.WorldX,iv.WorldY,s.MapHeight,s.Scale);
     rP=rM/s.Scale; li=local_map_view(s.MapImage,cR,cC,rP);
+    li=overlayLocalIV(li,iv,s.Scale,s.ShowLocalDirection);
     cla(s.LocalAxes); imshow(li,'Parent',s.LocalAxes);
     title(s.LocalAxes,sprintf('IV#%d R=%.0fm Sc=%g',iv.ID,rM,iv.ScaleFactor), ...
         'Color',[.85 .88 .95],'FontSize',9);
+end
+
+function onToggleLocalDirection(fig)
+    s = getappdata(fig,'AppState');
+    s.ShowLocalDirection = ~s.ShowLocalDirection;
+    if s.ShowLocalDirection
+        set(s.LocalDirectionBtn,'BackgroundColor',[.15 .15 .15],'ForegroundColor',[1 1 1]);
+        set(s.LocalDirectionBtn,'String','Hide Direction');
+        setSt(fig,'  OR2 local view: direction arrow shown.',[.55 .85 .60]);
+    else
+        set(s.LocalDirectionBtn,'BackgroundColor',[0.35 0.38 0.48],'ForegroundColor',[1 1 1]);
+        set(s.LocalDirectionBtn,'String','Show Direction');
+        setSt(fig,'  OR2 local view: direction arrow hidden.',[.55 .85 .60]);
+    end
+    setappdata(fig,'AppState',s);
+    updateLocalView(fig);
 end
 
 % #####################################################################
@@ -784,14 +813,169 @@ end
 function setSt(fig,msg,clr)
     s=getappdata(fig,'AppState');set(s.StatusBar,'String',msg,'ForegroundColor',clr);
 end
+function lines = buildIVReportLines(s)
+    n = length(s.IVList);
+    lines = cell(n + 1, 1);
+    lines{1} = 'ID   X(m)      Y(m)      Heading    Scale    Pixel(C,R)';
+    for k = 1:n
+        iv = s.IVList(k);
+        [pr, pc] = world_to_pixel(iv.WorldX, iv.WorldY, s.MapHeight, s.Scale);
+        lines{k + 1} = sprintf('#%-2d %-9.1f %-9.1f %-10.1f %-8.2f (%d,%d)', ...
+            iv.ID, iv.WorldX, iv.WorldY, iv.Angle, iv.ScaleFactor, pc, pr);
+    end
+end
+function outImg = renderOverlayImage(s)
+    outImg = s.RotatedImage;
+    if ~isempty(s.DistPixPts) && size(s.DistPixPts,1) >= 2 && ~isnan(s.DistanceValue)
+        [dR,dC] = mapPixToDisplay(s.DistPixPts,s);
+        label = sprintf('%.1f m',s.DistanceValue);
+        centerR = round(mean(dR(1:2)) - 15);
+        centerC = round(mean(dC(1:2)));
+        outImg = blendLabelBox(outImg,centerR,centerC,label,[200 38 38],0.42);
+    end
+end
+function drawMeasurementOverlay(s)
+    if ~isempty(s.DistPixPts)
+        [dR,dC] = mapPixToDisplay(s.DistPixPts,s);
+        hm=plot(s.MapAxes,dC,dR,'ro','MarkerSize',10,'LineWidth',2,'MarkerFaceColor',[1 .3 .3]);
+        set(hm,'HitTest','off');
+        if size(s.DistPixPts,1)>=2
+            hl=plot(s.MapAxes,dC(1:2),dR(1:2),'r-','LineWidth',2);
+            set(hl,'HitTest','off');
+            if ~isnan(s.DistanceValue)
+                drawDistanceText(s.MapAxes,mean(dC(1:2)),mean(dR(1:2))-15,sprintf('%.1f m',s.DistanceValue));
+            end
+        end
+    elseif strcmp(s.InteractiveMode,'measure_dist') && ~isempty(s.TempPoints)
+        [dR,dC] = mapPixToDisplay(s.TempPoints(:,3:4),s);
+        hm=plot(s.MapAxes,dC,dR,'ro','MarkerSize',10,'LineWidth',2,'MarkerFaceColor',[1 .3 .3]);
+        set(hm,'HitTest','off');
+    end
+
+    if ~isempty(s.TrajPixPts)
+        [tR,tC] = mapPixToDisplay(s.TrajPixPts,s);
+        hm=plot(s.MapAxes,tC,tR,'bs','MarkerSize',8,'LineWidth',2,'MarkerFaceColor',[.3 .5 1]);
+        set(hm,'HitTest','off');
+        if numel(tC) >= 2
+            hl=plot(s.MapAxes,tC,tR,'b-','LineWidth',2);
+            set(hl,'HitTest','off');
+        end
+    elseif strcmp(s.InteractiveMode,'measure_traj') && ~isempty(s.TempPoints)
+        [tR,tC] = mapPixToDisplay(s.TempPoints(:,3:4),s);
+        hm=plot(s.MapAxes,tC,tR,'bs','MarkerSize',8,'LineWidth',2,'MarkerFaceColor',[.3 .5 1]);
+        set(hm,'HitTest','off');
+        if numel(tC) >= 2
+            hl=plot(s.MapAxes,tC,tR,'b-','LineWidth',2);
+            set(hl,'HitTest','off');
+        end
+    end
+end
+function drawDistanceText(ax,x,y,label)
+    htShadow = text(ax,x+1,y+1,label,'Color',[.15 .05 .05],'FontSize',10,'FontWeight','bold', ...
+        'HorizontalAlignment','center','VerticalAlignment','middle');
+    set(htShadow,'HitTest','off');
+    ht = text(ax,x,y,label,'Color','w','FontSize',10,'FontWeight','bold', ...
+        'HorizontalAlignment','center','VerticalAlignment','middle');
+    set(ht,'HitTest','off');
+end
+function outImg = blendLabelBox(img,centerR,centerC,label,rgbColor,alphaVal)
+    outImg = img;
+    [imgH,imgW,~] = size(outImg);
+    boxH = 28;
+    boxW = max(74,12*length(label));
+    r1 = max(1,round(centerR - boxH/2));
+    r2 = min(imgH,round(centerR + boxH/2 - 1));
+    c1 = max(1,round(centerC - boxW/2));
+    c2 = min(imgW,round(centerC + boxW/2 - 1));
+    if r1 > r2 || c1 > c2
+        return;
+    end
+    for ch = 1:3
+        block = double(outImg(r1:r2,c1:c2,ch));
+        block = (1-alphaVal)*block + alphaVal*rgbColor(ch);
+        outImg(r1:r2,c1:c2,ch) = uint8(round(block));
+    end
+end
+function outImg = overlayLocalIV(img,iv,mapScale,showDirection)
+    outImg = img;
+    [imgH,imgW,~] = size(outImg);
+    centerR = (imgH + 1) / 2;
+    centerC = (imgW + 1) / 2;
+    halfL = (iv.Length * iv.ScaleFactor) / (2 * mapScale);
+    halfW = (iv.Width * iv.ScaleFactor) / (2 * mapScale);
+    ang = iv.Angle * pi / 180;
+    cosA = cos(ang);
+    sinA = sin(ang);
+    % Keep the local direction marker at a fixed readable size, independent
+    % of the IV scale factor, so the heading stays clear in OR2.
+    arrowLen = 14;
+    shaftHalfW = 1.8;
+    headLen = 5;
+    headHalfW = 4.5;
+    radius = ceil(max(sqrt(halfL^2 + halfW^2), arrowLen + headHalfW)) + 3;
+    rMin = max(1,floor(centerR - radius));
+    rMax = min(imgH,ceil(centerR + radius));
+    cMin = max(1,floor(centerC - radius));
+    cMax = min(imgW,ceil(centerC + radius));
+    bodyColor = [60 150 255];
+    edgeColor = [255 220 60];
+    if nargin < 4
+        showDirection = false;
+    end
+    arrowColor = [0 0 0];
+    for r = rMin:rMax
+        for c = cMin:cMax
+            dx = c - centerC;
+            dy = centerR - r;
+            u = cosA * dx + sinA * dy;
+            v = -sinA * dx + cosA * dy;
+            isBody = abs(u) <= halfL && abs(v) <= halfW;
+            if abs(u) <= halfL && abs(v) <= halfW
+                if abs(abs(u) - halfL) <= 1 || abs(abs(v) - halfW) <= 1
+                    outImg(r,c,:) = reshape(uint8(edgeColor),1,1,3);
+                else
+                    for ch = 1:3
+                        baseVal = double(outImg(r,c,ch));
+                        mixVal = 0.62 * baseVal + 0.38 * bodyColor(ch);
+                        outImg(r,c,ch) = uint8(round(mixVal));
+                    end
+                end
+            end
+            if showDirection
+                inShaft = (u >= 0) && (u <= arrowLen - headLen) && (abs(v) <= shaftHalfW);
+                headBaseU = arrowLen - headLen;
+                inHead = (u >= headBaseU) && (u <= arrowLen);
+                if inHead
+                    vLimit = headHalfW * (arrowLen - u) / max(headLen, 0.1);
+                else
+                    vLimit = -1;
+                end
+                if inShaft || (inHead && abs(v) <= vLimit)
+                    if ~isBody || u >= halfL * 0.10
+                        outImg(r,c,:) = reshape(uint8(arrowColor),1,1,3);
+                    end
+                end
+            end
+        end
+    end
+end
+function [dispR,dispC] = mapPixToDisplay(pixPts,s)
+    dispR = pixPts(:,1);
+    dispC = pixPts(:,2);
+    if abs(s.RotationAngle) > 0.001
+        for j = 1:size(pixPts,1)
+            [dispR(j),dispC(j)] = o2r(pixPts(j,1),pixPts(j,2),s);
+        end
+    end
+end
 function lab(p,pos,txt,fn,bg,fg)
     uicontrol('Parent',p,'Style','text','Units','normalized','Position',pos, ...
-        'String',txt,'FontName',fn,'FontSize',9,'BackgroundColor',bg,'ForegroundColor',fg, ...
+        'String',txt,'FontName',fn,'FontSize',10,'BackgroundColor',bg,'ForegroundColor',fg, ...
         'HorizontalAlignment','left');
 end
 function h=btn(p,pos,txt,fn,bg,fg,cb)
     h=uicontrol('Parent',p,'Style','pushbutton','Units','normalized','Position',pos, ...
-        'String',txt,'FontName',fn,'FontSize',9,'FontWeight','bold', ...
+        'String',txt,'FontName',fn,'FontSize',10,'FontWeight','bold', ...
         'BackgroundColor',bg,'ForegroundColor',fg,'Callback',cb);
 end
 function sep(p,y,clr)
@@ -800,8 +984,8 @@ function sep(p,y,clr)
 end
 function stit(p,y,txt,fn,bg,fg)
     uicontrol('Parent',p,'Style','text','Units','normalized', ...
-        'Position',[0.03 y 0.94 0.022],'String',txt, ...
-        'FontName',fn,'FontSize',9,'FontWeight','bold', ...
+        'Position',[0.03 y 0.94 0.026],'String',txt, ...
+        'FontName',fn,'FontSize',10,'FontWeight','bold', ...
         'BackgroundColor',bg,'ForegroundColor',fg,'HorizontalAlignment','center');
 end
 
