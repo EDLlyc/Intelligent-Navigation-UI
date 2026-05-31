@@ -806,9 +806,12 @@ function updateLocalView(fig)
     rM=str2double(get(s.RangeInput,'String')); if isnan(rM)||rM<=0,rM=100;end
     [cR,cC]=world_to_pixel(iv.WorldX,iv.WorldY,s.MapHeight,s.Scale);
     rP=rM/s.Scale; li=local_map_view(s.MapImage,cR,cC,rP);
+    localIV = iv;
     if abs(s.RotationAngle - (90 - iv.Angle)) < 0.01
         li = rotate_map(li, s.RotationAngle);
+        localIV.Angle = iv.Angle + s.RotationAngle;
     end
+    li = overlayLocalIV(li, localIV, s.Scale, s.ShowLocalDirection);
     cla(s.LocalAxes); imshow(li,'Parent',s.LocalAxes);
     if abs(s.RotationAngle - (90 - iv.Angle)) < 0.01
         titleStr = sprintf('IV#%d R=%.0fm Sc=%g | Head-Up',iv.ID,rM,iv.ScaleFactor);
