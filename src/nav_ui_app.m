@@ -59,35 +59,35 @@ function app = nav_ui_app(projectRoot)
 
     % ---- Mode indicator ----
     modeL = uicontrol('Parent',rp,'Style','text','Units','normalized', ...
-        'Position',[0.03 0.958 0.94 0.032],'String','Mode: Idle', ...
+        'Position',[0.03 0.955 0.44 0.028],'String','Mode: Idle', ...
         'FontName',FN,'FontSize',11,'FontWeight','bold', ...
-        'BackgroundColor',BP,'ForegroundColor',FO,'HorizontalAlignment','center');
+        'BackgroundColor',[.16 .18 .24],'ForegroundColor',FO,'HorizontalAlignment','left');
 
     % ---- Coordinate display (P6: more prominent position) ----
     coordDisp = uicontrol('Parent',rp,'Style','text','Units','normalized', ...
-        'Position',[0.03 0.932 0.94 0.026],'String','Coords: --', ...
+        'Position',[0.47 0.955 0.50 0.028],'String','Coords: --', ...
         'FontName',FN,'FontSize',10,'FontWeight','bold', ...
         'BackgroundColor',[.16 .18 .24],'ForegroundColor',[.3 1 .5],'HorizontalAlignment','center');
 
     % ========== VEHICLE CONTROLS ==========
-    sep(rp,0.96,BB); stit(rp,0.94,'VEHICLE CONTROLS',FN,BP,FS);
+    sep(rp,0.946,BB); stit(rp,0.918,'VEHICLE CONTROLS',FN,BP,FS);
 
-    lab(rp,[0.03 0.912 0.31 0.03],'Heading(deg):',FN,BP,FL);
+    lab(rp,[0.03 0.885 0.31 0.026],'Heading(deg):',FN,BP,FL);
     angIn = uicontrol('Parent',rp,'Style','edit','Units','normalized', ...
-        'Position',[0.34 0.912 0.14 0.03],'String','0','FontName',FN,'FontSize',9, ...
+        'Position',[0.34 0.885 0.14 0.026],'String','0','FontName',FN,'FontSize',9, ...
         'BackgroundColor',[.95 .95 .97]);
-    lab(rp,[0.52 0.912 0.16 0.03],'Scale:',FN,BP,FL);
+    lab(rp,[0.52 0.885 0.16 0.026],'Scale:',FN,BP,FL);
     scIn = uicontrol('Parent',rp,'Style','edit','Units','normalized', ...
-        'Position',[0.70 0.912 0.14 0.03],'String','1','FontName',FN,'FontSize',9, ...
+        'Position',[0.70 0.885 0.14 0.026],'String','1','FontName',FN,'FontSize',9, ...
         'BackgroundColor',[.95 .95 .97]);
 
-    btn(rp,[0.03 0.878 0.30 0.034],'➕ Add IV',FN,BA,[1 1 1],@(~,~)onAddIV(fig));
-    btn(rp,[0.35 0.878 0.30 0.034],'❌ Remove',FN,[.7 .3 .3],[1 1 1],@(~,~)onRemoveIV(fig));
-    btn(rp,[0.67 0.878 0.30 0.034],'📋 Report',FN,BB,[1 1 1],@(~,~)onReportIV(fig));
+    btn(rp,[0.03 0.849 0.30 0.030],'➕ Add IV',FN,BA,[1 1 1],@(~,~)onAddIV(fig));
+    btn(rp,[0.35 0.849 0.30 0.030],'❌ Remove',FN,[.7 .3 .3],[1 1 1],@(~,~)onRemoveIV(fig));
+    btn(rp,[0.67 0.849 0.30 0.030],'📋 Report',FN,BB,[1 1 1],@(~,~)onReportIV(fig));
 
-    lab(rp,[0.03 0.86 0.94 0.02],'Loaded IVs:',FN,BP,FL);
+    lab(rp,[0.03 0.820 0.94 0.020],'Loaded IVs:',FN,BP,FL);
     ivLB = uicontrol('Parent',rp,'Style','listbox','Units','normalized', ...
-        'Position',[0.03 0.77 0.94 0.088],'String',{'(none)'},'Value',1, ...
+        'Position',[0.03 0.744 0.94 0.068],'String',{'(none)'},'Value',1, ...
         'FontName',FN,'FontSize',9, ...
         'BackgroundColor',[.28 .30 .36],'ForegroundColor',[.9 .9 .95], ...
         'Callback',@(~,~)onListboxSelect(fig));
@@ -812,18 +812,9 @@ function updateLocalView(fig)
     rM=str2double(get(s.RangeInput,'String')); if isnan(rM)||rM<=0,rM=100;end
     [cR,cC]=world_to_pixel(iv.WorldX,iv.WorldY,s.MapHeight,s.Scale);
     rP=rM/s.Scale; li=local_map_view(s.MapImage,cR,cC,rP);
-    localIV = iv;
-    if abs(s.RotationAngle - (90 - iv.Angle)) < 0.01
-        li = rotate_map(li, s.RotationAngle);
-        localIV.Angle = iv.Angle + s.RotationAngle;
-    end
-    li = overlayLocalIV(li, localIV, s.Scale, s.ShowLocalDirection);
+    li = overlayLocalIV(li, iv, s.Scale, s.ShowLocalDirection);
     cla(s.LocalAxes); imshow(li,'Parent',s.LocalAxes);
-    if abs(s.RotationAngle - (90 - iv.Angle)) < 0.01
-        titleStr = sprintf('IV#%d R=%.0fm Sc=%g | Head-Up',iv.ID,rM,iv.ScaleFactor);
-    else
-        titleStr = sprintf('IV#%d R=%.0fm Sc=%g',iv.ID,rM,iv.ScaleFactor);
-    end
+    titleStr = sprintf('IV#%d R=%.0fm Sc=%g',iv.ID,rM,iv.ScaleFactor);
     title(s.LocalAxes,titleStr, ...
         'Color',[.85 .88 .95],'FontSize',9);
 end
