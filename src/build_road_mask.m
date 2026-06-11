@@ -98,6 +98,25 @@ function mask = build_road_mask(img, params)
     % ----- 连通性过滤 (方案 B) -----
     % 剔除所有无法连通至核心路网起点 (517, 468) 的孤立噪声块与楼顶
     mask = filter_isolated_roads(mask, 517, 468);
+
+    % ----- 自动硬编码纠偏数据库应用 -----
+    dbPath = fullfile(fileparts(mfilename('fullpath')), 'hardcode_db.mat');
+    if exist(dbPath, 'file') == 2
+        try
+            dbData = load(dbPath);
+            if isfield(dbData, 'must_not_be_road_indices') && ~isempty(dbData.must_not_be_road_indices)
+                valid_fp_idx = dbData.must_not_be_road_indices(dbData.must_not_be_road_indices <= numel(mask));
+                mask(valid_fp_idx) = false;
+            end
+            if isfield(dbData, 'must_be_road_indices') && ~isempty(dbData.must_be_road_indices)
+                valid_fn_idx = dbData.must_be_road_indices(dbData.must_be_road_indices <= numel(mask));
+                mask(valid_fn_idx) = true;
+            end
+        catch
+            warning('加载硬编码纠偏数据库失败，跳过硬编码处理。');
+        end
+    end
 end
+
 
 

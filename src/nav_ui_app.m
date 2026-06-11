@@ -85,7 +85,11 @@ function app = nav_ui_app(projectRoot)
     btn(rp,[0.35 0.849 0.30 0.030],'❌ Remove',FN,[.7 .3 .3],[1 1 1],@(~,~)onRemoveIV(fig));
     btn(rp,[0.67 0.849 0.30 0.030],'📋 Report',FN,BB,[1 1 1],@(~,~)onReportIV(fig));
 
-    lab(rp,[0.03 0.820 0.94 0.020],'Loaded IVs:',FN,BP,FL);
+    lab(rp,[0.03 0.820 0.50 0.020],'Loaded IVs:',FN,BP,FL);
+    maskToggle = uicontrol('Parent',rp,'Style','checkbox','Units','normalized', ...
+        'Position',[0.55 0.820 0.42 0.025],'String','🟣 Show Road Mask','FontName',FN, ...
+        'FontSize',9.5,'FontWeight','bold','BackgroundColor',BP,'ForegroundColor',FO, ...
+        'Callback',@(~,~)onToggleRoadMask(fig));
     ivLB = uicontrol('Parent',rp,'Style','listbox','Units','normalized', ...
         'Position',[0.03 0.744 0.94 0.068],'String',{'(none)'},'Value',1, ...
         'FontName',FN,'FontSize',9, ...
@@ -198,6 +202,7 @@ function app = nav_ui_app(projectRoot)
     s.ProjectRoot   = projectRoot;
     s.MapImage      = mapImage;   s.MapHeight = mapH;  s.MapWidth = mapW;
     s.Scale         = 1.7;        s.RoadMask = roadMask;
+    s.ShowRoadOverlay = false;    s.RotatedRoadMask = roadMask;
     s.RotationAngle = 0;          s.RotatedImage = mapImage;
     s.OrigCenter    = [(mapW+1)/2 (mapH+1)/2];
     s.RotCenter     = s.OrigCenter;
@@ -219,6 +224,7 @@ function app = nav_ui_app(projectRoot)
     s.AngleInput = angIn; s.ScaleInput = scIn;
     s.IVListbox = ivLB;   s.DistResult = dR;  s.TrajResult = tR;
     s.RotAngleInput = rotIn;
+    s.MaskToggle    = maskToggle;
     s.RangeInput = rgIn;  s.LocalAxes = locAx;
     s.LocalDirectionBtn = dirBtn;
     s.LocalInfo = localInfo;
@@ -610,8 +616,17 @@ function onRotate(fig)
     if isnan(a),setSt(fig,'  Invalid angle.',[1 .4 .4]);return;end
     setSt(fig,'  Rotating...',[1 .8 .3]); drawnow;
     s.RotationAngle=a;
-    if abs(a)<0.001, s.RotatedImage=s.MapImage; s.RotCenter=s.OrigCenter;
-    else,[ri,nh,nw]=rotate_map(s.MapImage,a); s.RotatedImage=ri; s.RotCenter=[(nw+1)/2 (nh+1)/2];end
+    if abs(a)<0.001
+        s.RotatedImage=s.MapImage; 
+        s.RotatedRoadMask=s.RoadMask;
+        s.RotCenter=s.OrigCenter;
+    else
+        [ri,nh,nw]=rotate_map(s.MapImage,a); 
+        s.RotatedImage=ri; 
+        [rm_rot, ~, ~]=rotate_map(uint8(s.RoadMask),a);
+        s.RotatedRoadMask=(rm_rot > 0);
+        s.RotCenter=[(nw+1)/2 (nh+1)/2];
+    end
     setappdata(fig,'AppState',s); refreshDisp(fig);
     setSt(fig,sprintf('  Rotated %.1f deg.',a),[.4 .9 .5]);
 end
@@ -774,6 +789,13 @@ function onPathClear(fig)
     setappdata(fig,'AppState',s); refreshDisp(fig); setSt(fig,'  Path cleared.',[.55 .85 .60]);
 end
 
+function onToggleRoadMask(fig)
+    s = getappdata(fig, 'AppState');
+    s.ShowRoadOverlay = get(s.MaskToggle, 'Value') == 1;
+    setappdata(fig, 'AppState', s);
+    refreshDisp(fig);
+end
+
 % #####################################################################
 %  DISPLAY
 % #####################################################################
@@ -781,7 +803,20 @@ end
 function refreshDisp(fig)
     s=getappdata(fig,'AppState');
     cla(s.MapAxes);
-    hI=imshow(s.RotatedImage,'Parent',s.MapAxes);
+    
+    displayImg = s.RotatedImage;
+    if isfield(s, 'ShowRoadOverlay') && s.ShowRoadOverlay
+        [rH, rW, ~] = size(displayImg);
+        roadColorRGB = reshape(uint8([160, 32, 240]), 1, 1, 3);
+        alpha = 0.45;
+        roadColorMap = repmat(roadColorRGB, [rH, rW, 1]);
+        blended = uint8((1 - alpha) * double(displayImg) + alpha * double(roadColorMap));
+        
+        mask3 = repmat(s.RotatedRoadMask, [1, 1, 3]);
+        displayImg(mask3) = blended(mask3);
+    end
+    
+    hI=imshow(displayImg,'Parent',s.MapAxes);
     set(hI,'ButtonDownFcn',s.ClickCB);
     % Re-apply context menu to new image (P9)
     if isfield(s,'ContextMenu') && isvalid(s.ContextMenu)

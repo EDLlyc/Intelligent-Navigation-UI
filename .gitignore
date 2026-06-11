@@ -2,3 +2,4 @@
 *.mlx.autosave
 *.m~
 *.log
+temp/
