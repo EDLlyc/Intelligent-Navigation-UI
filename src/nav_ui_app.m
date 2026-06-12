@@ -689,13 +689,29 @@ function onSkelRoadArea(fig)
         skelIm(sub2ind([H,W],pr(valid),pc(valid)))=true;
     end
     
-    % 2. Create 30px circular kernel for convolution-based dilation (Zero-Toolbox compliant)
-    radius=30;
-    [kx,ky]=meshgrid(-radius:radius,-radius:radius);
-    K=double(kx.^2+ky.^2<=radius^2);
+    % 2. Identify all active skeleton pixels
+    [skelR, skelC] = find(skelIm);
     
-    % 3. Fast convolution to get precise spatial neighborhood mask
-    nearMask = conv2(double(skelIm),K,'same')>0;
+    % 3. Vectorized dilation using circular mask offsets (No conv2 or toolbox dependencies)
+    radius = 30;
+    [kx, ky] = meshgrid(-radius:radius, -radius:radius);
+    inCircle = (kx.^2 + ky.^2 <= radius^2);
+    circle_r = ky(inCircle);
+    circle_c = kx(inCircle);
+    
+    % Perform vectorized expansion of all coordinates
+    R_coords = double(skelR) + circle_r';
+    C_coords = double(skelC) + circle_c';
+    
+    % Keep within image boundaries
+    valid_pts = R_coords >= 1 & R_coords <= H & C_coords >= 1 & C_coords <= W;
+    
+    % Create the neighborhood mask using manual linear indexing
+    nearMask = false(H, W);
+    if ~isempty(skelR)
+        linIdx = R_coords(valid_pts) + (C_coords(valid_pts) - 1) * H;
+        nearMask(linIdx) = true;
+    end
     
     % 4. Combine with road mask and apply color masking
     roadArea=s.RoadMask & nearMask; mi=s.MapImage;
