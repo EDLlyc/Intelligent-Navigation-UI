@@ -154,7 +154,8 @@ function mask = build_road_mask(img, params)
     % ----- 7. Solidity Analysis (剔除大楼) -----
     CC = bwconncomp(mask);
     numPixels = cellfun(@numel, CC.PixelIdxList);
-    largeRegions = find(numPixels > 500);
+    % 筛选面积在合理范围 [500, 30000] 的连通域进行几何大楼分析，防止全局主路网被误杀
+    largeRegions = find(numPixels > 500 & numPixels < 30000);
     for i = 1:length(largeRegions)
         idx = CC.PixelIdxList{largeRegions(i)};
         [r_pts, c_pts] = ind2sub([H, W], idx);
