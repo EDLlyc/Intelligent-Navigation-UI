@@ -686,7 +686,10 @@ function onSkelRoadArea(fig)
         pr=round(r1+t*(r2-r1));
         pc=round(c1+t*(c2-c1));
         valid=pr>=1 & pr<=H & pc>=1 & pc<=W;
-        skelIm(sub2ind([H,W],pr(valid),pc(valid)))=true;
+        valid_r = pr(valid);
+        valid_c = pc(valid);
+        linIdx = valid_r + (valid_c - 1) * H;
+        skelIm(linIdx)=true;
     end
     
     % 2. Identify all active skeleton pixels
@@ -694,7 +697,10 @@ function onSkelRoadArea(fig)
     
     % 3. Vectorized dilation using circular mask offsets (No conv2 or toolbox dependencies)
     radius = 30;
-    [kx, ky] = meshgrid(-radius:radius, -radius:radius);
+    % 原生外积构造 meshgrid 网格以替代内置 meshgrid 函数
+    grid_size = 2 * radius + 1;
+    kx = ones(grid_size, 1) * (-radius:radius);
+    ky = (-radius:radius)' * ones(1, grid_size);
     inCircle = (kx.^2 + ky.^2 <= radius^2);
     circle_r = ky(inCircle);
     circle_c = kx(inCircle);
@@ -820,13 +826,23 @@ function refreshDisp(fig)
     displayImg = s.RotatedImage;
     if isfield(s, 'ShowRoadOverlay') && s.ShowRoadOverlay
         [rH, rW, ~] = size(displayImg);
-        roadColorRGB = reshape(uint8([160, 32, 240]), 1, 1, 3);
         alpha = 0.45;
-        roadColorMap = repmat(roadColorRGB, [rH, rW, 1]);
+        
+        % 原生通道混色与通道赋值，替代内置 reshape 和 repmat 函数
+        roadColorMap = uint8(zeros(rH, rW, 3));
+        roadColorMap(:,:,1) = 160;
+        roadColorMap(:,:,2) = 32;
+        roadColorMap(:,:,3) = 240;
+        
         blended = uint8((1 - alpha) * double(displayImg) + alpha * double(roadColorMap));
         
-        mask3 = repmat(s.RotatedRoadMask, [1, 1, 3]);
-        displayImg(mask3) = blended(mask3);
+        % 分通道将混合后的颜色赋予 displayImg，避免使用 3D 掩膜的 repmat
+        for ch = 1:3
+            chImg = displayImg(:,:,ch);
+            chBlended = blended(:,:,ch);
+            chImg(s.RotatedRoadMask) = chBlended(s.RotatedRoadMask);
+            displayImg(:,:,ch) = chImg;
+        end
     end
     
     hI=imshow(displayImg,'Parent',s.MapAxes);
@@ -1033,7 +1049,9 @@ function outImg = overlayLocalIV(img,iv,mapScale,showDirection)
             isBody = abs(u) <= halfL && abs(v) <= halfW;
             if abs(u) <= halfL && abs(v) <= halfW
                 if abs(abs(u) - halfL) <= 1 || abs(abs(v) - halfW) <= 1
-                    outImg(r,c,:) = reshape(uint8(edgeColor),1,1,3);
+                    outImg(r,c,1) = uint8(edgeColor(1));
+                    outImg(r,c,2) = uint8(edgeColor(2));
+                    outImg(r,c,3) = uint8(edgeColor(3));
                 else
                     for ch = 1:3
                         baseVal = double(outImg(r,c,ch));
@@ -1053,7 +1071,9 @@ function outImg = overlayLocalIV(img,iv,mapScale,showDirection)
                 end
                 if inShaft || (inHead && abs(v) <= vLimit)
                     if ~isBody || u >= halfL * 0.10
-                        outImg(r,c,:) = reshape(uint8(arrowColor),1,1,3);
+                        outImg(r,c,1) = uint8(arrowColor(1));
+                        outImg(r,c,2) = uint8(arrowColor(2));
+                        outImg(r,c,3) = uint8(arrowColor(3));
                     end
                 end
             end

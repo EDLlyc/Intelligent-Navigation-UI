@@ -40,7 +40,18 @@ function filtered_mask = filter_isolated_roads(mask, startR, startC)
             end
         end
         dist = dr_grid.^2 + dc_grid.^2;
-        [~, sortIdx] = sort(dist);
+        
+        % 手写冒泡排序，对 25 个距离值对应的索引进行排序
+        sortIdx = 1:25;
+        for i = 1:24
+            for j = i+1:25
+                if dist(sortIdx(i)) > dist(sortIdx(j))
+                    temp = sortIdx(i);
+                    sortIdx(i) = sortIdx(j);
+                    sortIdx(j) = temp;
+                end
+            end
+        end
         
         found_nearest = false;
         for k = 1:length(sortIdx)

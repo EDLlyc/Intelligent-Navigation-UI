@@ -48,13 +48,22 @@ function streetImg = generate_street_view(mapImage, centreR, centreC, ...
            cos(pan + pi/2);
            0.0];
        
-    v_c = cross(n_c, u_c);
+    % 原生三维叉乘公式，替代内置 cross 函数
+    v_c = [n_c(2)*u_c(3) - n_c(3)*u_c(2);
+           n_c(3)*u_c(1) - n_c(1)*u_c(3);
+           n_c(1)*u_c(2) - n_c(2)*u_c(1)];
 
     R_cw = [u_c, v_c, n_c];
 
     % 4. Ray Casting Mesh Grid
-    [u_grid, v_grid] = meshgrid(0:W_out-1, 0:H_out-1);
-    A_inv = inv(A);
+    % 原生外积构造 meshgrid 网格以替代内置 meshgrid 函数
+    u_grid = ones(H_out, 1) * (0:W_out-1);
+    v_grid = (0:H_out-1)' * ones(1, W_out);
+    
+    % 相机上三角内参矩阵的解析求逆公式，替代内置 inv 函数
+    A_inv = [1/focal_length, 0, - (W_out/2)/focal_length;
+             0, 1/focal_length, - (H_out/2)/focal_length;
+             0, 0, 1];
     hom_coords = [u_grid(:)'; v_grid(:)'; ones(1, H_out * W_out)];
     
     % Rays in camera frame and world frame
@@ -78,9 +87,18 @@ function streetImg = generate_street_view(mapImage, centreR, centreC, ...
     in_bounds = (u_map >= 1) & (u_map <= imgW) & (v_map >= 1) & (v_map <= imgH);
     final_valid = valid & in_bounds;
 
-    final_valid = reshape(final_valid, H_out, W_out);
-    u_map = reshape(u_map, H_out, W_out);
-    v_map = reshape(v_map, H_out, W_out);
+    % 使用 MATLAB 原生的二维矩阵列优先隐式赋值，替代内置 reshape 函数
+    final_valid_2d = false(H_out, W_out);
+    final_valid_2d(:) = final_valid;
+    final_valid = final_valid_2d;
+
+    u_map_2d = zeros(H_out, W_out);
+    u_map_2d(:) = u_map;
+    u_map = u_map_2d;
+
+    v_map_2d = zeros(H_out, W_out);
+    v_map_2d(:) = v_map;
+    v_map = v_map_2d;
 
     % 5. Render Sky Background
     streetImg = uint8(zeros(H_out, W_out, 3));
@@ -108,7 +126,9 @@ function streetImg = generate_street_view(mapImage, centreR, centreC, ...
     end
 
     % 7. Exponential Distance-based Fog Effect
-    t_mat = reshape(t, H_out, W_out);
+    % 使用 MATLAB 原生的二维矩阵列优先隐式赋值，替代内置 reshape 函数
+    t_mat = zeros(H_out, W_out);
+    t_mat(:) = t;
     fogAmt = (t_mat / 220).^1.2 * 0.60;
     fogAmt(~final_valid) = 0;
     fogAmt = min(0.60, max(0, fogAmt));

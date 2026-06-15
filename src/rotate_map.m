@@ -45,7 +45,9 @@ function [rotated, newH, newW] = rotate_map(img, angle_deg)
     newcy = (newH + 1) / 2;
 
     % --- Inverse mapping (vectorised) ---
-    [outC, outR] = meshgrid(1:newW, 1:newH);
+    % 原生外积构造 meshgrid 网格以替代内置 meshgrid 函数
+    outC = ones(newH, 1) * (1:newW);
+    outR = (1:newH)' * ones(1, newW);
 
     dc = outC - newcx;
     dr = outR - newcy;

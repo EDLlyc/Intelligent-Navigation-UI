@@ -125,7 +125,7 @@ function [pathR, pathC] = road_path_bfs(roadMask, startR, startC, endR, endC)
         idx_f = idx_f + 1;
         trace_f(idx_f) = curr;
     end
-    path_f = flipud(trace_f(1:idx_f));
+    path_f = trace_f(idx_f:-1:1);
 
     % Trace backward path
     trace_b = zeros(maxQ, 1, 'int32');

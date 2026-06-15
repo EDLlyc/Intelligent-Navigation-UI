@@ -46,7 +46,9 @@ function localImg = local_map_view(mapImage, centreR, centreC, radiusPix)
         mapImage(rMin:rMax, cMin:cMax, :);
 
     % --- Apply circular mask ---
-    [xx, yy] = meshgrid(1:outSize, 1:outSize);
+    % 原生外积构造 meshgrid 网格以替代内置 meshgrid 函数
+    xx = ones(outSize, 1) * (1:outSize);
+    yy = (1:outSize)' * ones(1, outSize);
     centre = R + 1;
     circMask = ((xx - centre).^2 + (yy - centre).^2) <= R^2;
 
