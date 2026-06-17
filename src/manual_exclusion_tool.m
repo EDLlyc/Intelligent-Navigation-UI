@@ -19,7 +19,8 @@ if exist(savePath, 'file')
     load(savePath, 'exclusion_mask', 'inclusion_mask');
 end
 
-[colsGrid, rowsGrid] = meshgrid(1:W, 1:H);
+colsGrid = ones(H, 1) * (1:W);
+rowsGrid = (1:H)' * ones(1, W);
 
 while true
     fprintf('\n==================================================\n');
