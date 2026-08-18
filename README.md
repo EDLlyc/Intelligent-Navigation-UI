@@ -1,4 +1,19 @@
-# Intelligent Navigation UI — 智能车辆导航系统 (MATLAB)
+<p align="center">
+  <picture>
+    <source srcset="./assets/project-logo.png" media="(prefers-color-scheme: dark)">
+    <source srcset="./assets/project-logo.png" media="(prefers-color-scheme: light)">
+    <img
+      src="./assets/project-logo.png"
+      alt="Intelligent Navigation"
+      width="580"
+      style="image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;"
+    >
+  </picture>
+</p>
+
+<p align="center">
+  <strong>A pure-MATLAB navigation interface with handwritten spatial algorithms.</strong>
+</p>
 
 这是一个为 **ISE 333: User Interface Development (Design)** 课程设计的高性能、全功能智能车辆导航用户界面系统。本系统完全基于 **纯 MATLAB (Pure MATLAB)** 开发，**不需要安装任何额外的工具箱 (Zero Toolboxes Required)**，所有高级算法均采用底层数学逻辑手写实现，具有极高的合规性、稳定性和交互美观度。
 
